@@ -24,7 +24,7 @@ function startPool(){
             let promise = new Promise(function(resolvePool){ 
         
                 var db_config = {
-                    host: "54.164.252.143",
+                    host: "34.192.13.231",
                     user: "root",
                     password: "Mudaragora00",
                     database: poolDatabaseNames[i]
