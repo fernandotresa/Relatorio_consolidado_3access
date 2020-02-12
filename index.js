@@ -2,20 +2,30 @@ let mysql = require('mysql');
 let express =  require('express');
 let app = express();
 var moment = require('moment');
+const xl = require('excel4node');
 
 var poolDatabaseNames = ["3access", "aguapei", "anchieta", "carlosbotelho", "cavernadodiabo", "itatins", "itingucu", "morrododiabo", "pesm_caminhosdomar", "pesm_caraguatatuba", "pesm_cunha", "pesm_picinguaba", "pesm_santavirginia", "petar_caboclos", "petar_ouro_grosso", "petar_santana"]
 var poolDatabases = []
 var poolDatabasesCon = []
 
-var dataInicio = moment().format()
+var dataInicio = moment().add(-1, 'month').format()
 var dataFinal = moment().add(1, 'month').format()
+var workbook = new xl.Workbook();
+var worksheet = workbook.addWorksheet('Sheet 1');
 
+// Create a reusable style
+var style = workbook.createStyle({
+    font: {
+      color: '#FF0800',
+      size: 12
+    },
+  });   
 
-function startPool(){
-
-    console.log('Iniciando Pool: ' + poolDatabaseNames, poolDatabaseNames.length)
+function startPool(){    
 
     return new Promise(function(resolve, reject){ 
+
+        log_('Iniciando Pool de banco de dados: ' + poolDatabaseNames)
 
         let promises = []
 
@@ -29,9 +39,7 @@ function startPool(){
                     password: "Mudaragora00",
                     database: poolDatabaseNames[i]
                 };
-            
-                console.log('Adicionando ', db_config)       
-
+                            
                 resolvePool(poolDatabases.push(db_config))
         
             })
@@ -41,15 +49,21 @@ function startPool(){
         }
 
         Promise.all(promises)
-        .then(() => {
-    
-            console.log("Pool de bancos de dados criado com sucesso")            
-            console.log(poolDatabases)
+        .then(() => {    
 
-            handleDisconnects();        
+            handleDisconnects()
 
-            resolve()
-    
+            .then(() => {                
+                resolve("Conexões criadas com sucesso! Total de bancos conectados: " + poolDatabases.length)
+
+            })
+            .catch(() => {                
+
+                reject("Erro ao criar conexões no pool")
+            });                        
+        })
+        .catch(() => {            
+            reject("Erro ao adicionar no poool")
         })
 
     })
@@ -58,52 +72,69 @@ function startPool(){
 
 function handleDisconnects() {
 
-    let promises = []
-    console.log('Criando conexoes', poolDatabases)
+    return new Promise(function(resolve, reject){ 
 
-    for(let i = 0; i < poolDatabases.length; i++){
+        let promises = []
 
-        let promise = new Promise(function(resolve, reject){ 
+        for(let i = 0; i < poolDatabases.length; i++){
 
-            let con = mysql.createConnection(poolDatabaseNames[i]);               
+            let promise = new Promise(function(resolve, reject){ 
 
-            con.connect(function(err) {
-    
-                con.on('error', function(err) {    
-                    reject(err);                
+                let con = mysql.createConnection(poolDatabases[i]);               
+
+                con.connect(function(err) {
+                    if(err){
+                        reject('Erro no banco de dados: ' + err);
+                    }
+                    else {
+                        log_("Database conectado! Aguardando conexões: " + poolDatabaseNames[i])
+                        resolve(poolDatabasesCon.push(con))
+                    }
+                    
+                    
                 });
                 
-                log_("Database conectado! Aguardando conexões: " + poolDatabaseNames[i])
-    
-                resolve(poolDatabasesCon.push(con))
-            });
+            })
+
+
+            promises.push(promise)
             
+        }
+
+        Promise.all(promises)
+        .then(() => {
+
+            log_("Todos os bancos foram conectados com sucesso!")
+
+            iniciaRelatorio()
+
+            .then(() => {
+                resolve()
+            })
+            .catch((error) => {
+                reject(error)
+            });
+
         })
+        .catch((error) => {
+            reject(error)
+        });
 
-
-        promises.push(promise)
-        
-    }
-
-    Promise.all(promises)
-    .then(() => {
-
-        console.log("Todos os bancos de dados conectados com sucesso")
-        iniciaRelatorio()
-
-    })
-    .catch((error) => {
-
-        console.log("Falha ao conectar no banco de dados. Erro: " + error)
-    });
-
-    
+        })        
 }
 
 function startInterface(){
-    console.log('Iniciando aplicativo')
+    log_('Iniciando aplicativo. Preparando databases')
 
     startPool()      
+
+    .then(() => {        
+        log_('Finalizado com sucesso')
+
+    })
+    .catch((error => {
+        log_(error)
+    }))
 }
 
 function log_(str){
@@ -114,53 +145,121 @@ function log_(str){
 
 function iniciaRelatorio(){
 
-    console.log('Iniciando relatório')
-    let promises = []
+    return new Promise(function(resolveFinal, rejectFinal){ 
 
-    for(let i = 0; i < poolDatabasesCon.length; i++){
+        log_('Iniciando relatório')
 
-        let promise = new Promise(function(resolve, reject){         
+        let promises = []
 
-            let con = poolDatabasesCon[i]
-            getInfoVendas(con)
-            resolve()
+        for(let i = 0; i < poolDatabasesCon.length; i++){
+
+            let promise = new Promise(function(resolve, reject){         
+
+                let con = poolDatabasesCon[i]
+
+                getInfoVendas(con)
+
+                .then((result) => {
+
+                    popularExcel(result)
+
+                    .then(() => {
+                        //workbook.write('Excel.xlsx');
+                        resolve()
+                    })
+                    
+                    .catch((error => {                
+                        reject(error)
+                    }))
+                    
+                })
+
+                .catch((error => {                
+                    reject(error)
+                }))
+                
+            })
+
+            promises.push(promise)        
+        }
+            
+        
+        Promise.all(promises)
+        .then(() => {
+            
+            resolveFinal("Todos os relatórios emitidos com sucesso")
+
+        })
+        .catch((error) => {
+
+            rejectFinal("Falha ao emitir relatório no banco de dados. Erro: " + error)
+        }); 
+
         })
 
-        promises.push(promise)        
-    }
-        
-    
-    Promise.all(promises)
-    .then(() => {
-
-        console.log("Todos os relatórios emitidos com sucesso")
-
-    })
-    .catch((error) => {
-
-        console.log("Falha ao emitir relatório no banco de dados. Erro: " + error)
-    });
-
-    
-
+       
 }
 
 function getInfoVendas(con){
-         
-    let sql = "SELECT fk_id_estoque_utilizavel FROM 3a_log_vendas \
+
+
+    return new Promise(function(resolve, reject){
+
+        let sql = "SELECT * \
+                FROM 3a_log_vendas \
+                INNER JOIN 3a_produto ON 3a_produto.id_produto = 3a_log_vendas.fk_id_produto \
+                INNER JOIN 3a_tipo_produto ON 3a_tipo_produto.id_tipo_produto = 3a_produto.fk_id_tipo_produto \
+                INNER join 3a_subtipo_produto ON 3a_subtipo_produto.id_subtipo_produto = 3a_log_vendas.fk_id_subtipo_produto \
+                INNER JOIN 3a_log_utilizacao ON 3a_log_utilizacao.fk_id_estoque_utilizavel = 3a_log_vendas.fk_id_estoque_utilizavel \
                 WHERE 3a_log_vendas.data_log_venda BETWEEN '" + dataInicio + "' AND  '" + dataFinal + "' \
                 ORDER BY 3a_log_vendas.data_log_venda DESC;"
 
 
-    log_(sql)
+        log_(sql)
 
-    con.query(sql, function (err, result) {        
+        con.query(sql, function (err, result) {        
+            if (err){
+                console.log(err)
+                reject(err);
+            }
 
-        console.log(err)
-        if (err) throw err;
+            con.end()
+            resolve(result)
 
-        console.log(result); 
-    });
+        });
+
+    })
+}
+
+function popularExcel(result){
+
+    return new Promise(function(resolve, reject){    
+        
+        
+        if(result[0]){
+
+            let data_log_venda = result[0].data_log_venda
+            let data_log_utilizacao = result[0].data_log_utilizacao
+            let fk_id_estoque_utilizavel = result[0].fk_id_estoque_utilizavel            
+            let nome_tipo_produto = result[0].nome_tipo_produto
+            let nome_subtipo_produto = result[0].nome_subtipo_produto
+            let valor_produto = result[0].valor_produto                      
+            
+            console.log(data_log_venda, data_log_utilizacao, fk_id_estoque_utilizavel, nome_tipo_produto, nome_subtipo_produto, valor_produto)            
+    
+           // worksheet.cell(1,1).string(data_log_venda).style(style);
+           // worksheet.cell(1,2).number(fk_id_estoque_utilizavel).style(style);
+
+
+            resolve()
+        }
+
+        else {
+            reject("Não foi possível realizar consulta no banco")
+        }
+        
+    })
+    
 }
 
 
