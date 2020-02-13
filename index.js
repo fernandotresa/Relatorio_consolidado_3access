@@ -25,6 +25,8 @@ var poolDatabaseNames = [
 
 
 var poolDatabases = []
+
+var diretorioArquivos = "/tmp/"
 var rowGeral = 2    
 var dataInicio = moment().add(-1, 'month').format()
 var dataFinal = moment().add(1, 'month').format()
@@ -234,19 +236,32 @@ function popularExcel(result, poolDatabaseNames){
 
                 let data_log_venda = moment(result[i].data_log_venda).format("DD/MM/YYYY hh:mm:ss")
                 let data_log_utilizacao = moment(result[i].data_log_utilizacao).format("DD/MM/YYYY hh:mm:ss")
+                let ip_maquina_venda = result[i].ip_maquina_venda
+                let tipoDeIngresso = "Ingressos"
                 let fk_id_estoque_utilizavel = result[i].fk_id_estoque_utilizavel            
                 let nome_tipo_produto = result[i].nome_tipo_produto
                 let nome_subtipo_produto = result[i].nome_subtipo_produto
-                let valor_produto = result[i].valor_produto                                      
-
+                let valor_produto = result[i].valor_produto         
+                let tipoPagamento = "Online"
+                let centroCusto = "540007"
+                let nomeParque = "Núcleo Caminhos do Mar"
+                let nucleoParque = "PESM - Caminhos do Mar"
+                
+                
                 let col = 1                
         
-                worksheet.cell(rowGeral, col++).string(data_log_venda);
+                worksheet.cell(rowGeral, col++).string(data_log_venda).style(style);
                 worksheet.cell(rowGeral, col++).string(data_log_utilizacao).style(style);
+                worksheet.cell(rowGeral, col++).string(ip_maquina_venda).style(style);                
                 worksheet.cell(rowGeral, col++).number(fk_id_estoque_utilizavel).style(style)
+                worksheet.cell(rowGeral, col++).string(tipoDeIngresso);
                 worksheet.cell(rowGeral, col++).string(nome_tipo_produto).style(style);
                 worksheet.cell(rowGeral, col++).string(nome_subtipo_produto).style(style);
                 worksheet.cell(rowGeral, col++).number(valor_produto).style(style);                                                                                
+                worksheet.cell(rowGeral, col++).string(tipoPagamento).style(style);
+                worksheet.cell(rowGeral, col++).string(centroCusto).style(style);
+                worksheet.cell(rowGeral, col++).string(nomeParque).style(style);
+                worksheet.cell(rowGeral, col++).string(nucleoParque).style(style);
 
                 rowGeral++
 
@@ -267,7 +282,7 @@ function popularExcel(result, poolDatabaseNames){
             if(result.length > 0){
                 
                 let datetime = moment().format("DDMMYYYYhhmmss")
-                let filename = poolDatabaseNames + '_' + datetime + '.xlsx'
+                let filename = diretorioArquivos + "/" + poolDatabaseNames + '_' + datetime + '.xlsx'
                 workbook.write(filename)
     
                 console.log(filename)
