@@ -23,6 +23,24 @@ var poolDatabaseNames = [
         "petar_santana"
     ]
 
+var centroCusto = [
+        "540007", 
+        "540007", 
+        "540007", 
+        "540007", 
+        "540007", 
+        "540007", 
+        "540007", 
+        "540007", 
+        "540007",
+        "540007", 
+        "540007", 
+        "540007", 
+        "540007", 
+        "540007", 
+        "540007", 
+        "540007"
+    ]
 
 var poolDatabases = []
 
@@ -136,7 +154,7 @@ function handleDisconnects() {
                             
                             log_("Salvando o resultado do database: " + poolDatabaseNames[i])
 
-                            popularExcel(result, poolDatabaseNames[i])
+                            popularExcel(result, i)
                             .then(() => {
 
                                 resolve()
@@ -224,7 +242,7 @@ function getInfoVendas(con){
     })
 }
 
-function popularExcel(result, poolDatabaseNames){
+function popularExcel(result, index){
 
     return new Promise(function(resolve, reject){    
         
@@ -243,10 +261,9 @@ function popularExcel(result, poolDatabaseNames){
                 let nome_subtipo_produto = result[i].nome_subtipo_produto
                 let valor_produto = result[i].valor_produto         
                 let tipoPagamento = "Online"
-                let centroCusto = "540007"
+                let centroCustoStr = centroCusto[index]
                 let nomeParque = "Núcleo Caminhos do Mar"
-                let nucleoParque = "PESM - Caminhos do Mar"
-                
+                let nucleoParque = "PESM - Caminhos do Mar"                                
                 
                 let col = 1                
         
@@ -259,7 +276,7 @@ function popularExcel(result, poolDatabaseNames){
                 worksheet.cell(rowGeral, col++).string(nome_subtipo_produto).style(style);
                 worksheet.cell(rowGeral, col++).number(valor_produto).style(style);                                                                                
                 worksheet.cell(rowGeral, col++).string(tipoPagamento).style(style);
-                worksheet.cell(rowGeral, col++).string(centroCusto).style(style);
+                worksheet.cell(rowGeral, col++).string(centroCustoStr).style(style);
                 worksheet.cell(rowGeral, col++).string(nomeParque).style(style);
                 worksheet.cell(rowGeral, col++).string(nucleoParque).style(style);
 
@@ -282,13 +299,13 @@ function popularExcel(result, poolDatabaseNames){
             if(result.length > 0){
                 
                 let datetime = moment().format("DDMMYYYYhhmmss")
-                let filename = diretorioArquivos + "/" + poolDatabaseNames + '_' + datetime + '.xlsx'
+                let filename = diretorioArquivos + poolDatabaseNames[index] + '_' + datetime + '.xlsx'
                 workbook.write(filename)
     
                 console.log(filename)
     
                 setTimeout(() => {
-                    resolve("Sucesso ao adicionar gerar excel do banco " + poolDatabaseNames)
+                    resolve("Sucesso ao adicionar gerar excel do banco " + poolDatabaseNames[index])
                     
                 }, 3000)
                 
