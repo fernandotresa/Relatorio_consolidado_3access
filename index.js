@@ -4,14 +4,51 @@ let app = express();
 var moment = require('moment');
 const xl = require('excel4node');
 
-var poolDatabaseNames = ["3access", "aguapei", "anchieta", "carlosbotelho", "cavernadodiabo", "itatins", "itingucu", "morrododiabo", "pesm_caminhosdomar", "pesm_caraguatatuba", "pesm_cunha", "pesm_picinguaba", "pesm_santavirginia", "petar_caboclos", "petar_ouro_grosso", "petar_santana"]
-var poolDatabases = []
-var poolDatabasesCon = []
+var poolDatabaseNames = [
+        "3access", 
+        "aguapei", 
+        "anchieta", 
+        "carlosbotelho", 
+        "cavernadodiabo", 
+        "itatins", 
+        "itingucu", 
+        "morrododiabo", 
+        "pesm_caminhosdomar",
+        "pesm_caraguatatuba", 
+        "pesm_cunha", 
+        "pesm_picinguaba", 
+        "pesm_santavirginia", 
+        "petar_caboclos", 
+        "petar_ouro_grosso", 
+        "petar_santana"
+    ]
 
+
+var poolDatabases = []
+var rowGeral = 2    
 var dataInicio = moment().add(-1, 'month').format()
 var dataFinal = moment().add(1, 'month').format()
 var workbook = new xl.Workbook();
-var worksheet = workbook.addWorksheet('Sheet 1');
+var worksheet = workbook.addWorksheet('Relatorio');
+
+worksheet.cell(1, 1).string('Data de Compra');
+worksheet.cell(1, 2).string('Data de Uso');
+worksheet.cell(1, 3).string('Número do Pedido');
+worksheet.cell(1, 4).string('Número de Ingresso');
+worksheet.cell(1, 5).string('Tipo de Ingresso / Hospedagem');
+worksheet.cell(1, 6).string('Tipo do Produto');
+worksheet.cell(1, 6).string('Subtipo de Ingresso');
+worksheet.cell(1, 6).string('Valor');
+worksheet.cell(1, 6).string('Tipo de Pagamento'); 
+worksheet.cell(1, 6).string('Centro de Custo'); 
+worksheet.cell(1, 6).string('Nome do Parque'); 
+worksheet.cell(1, 6).string('Núcleo do Parque'); 
+
+worksheet.column(1).setWidth(25);
+worksheet.column(2).setWidth(25);
+worksheet.column(3).setWidth(25);
+
+worksheet.row(1).setHeight(25);
 
 // Create a reusable style
 var style = workbook.createStyle({
@@ -29,7 +66,7 @@ function startPool(){
 
         let promises = []
 
-        for(var i = 0; i < poolDatabaseNames.length; i++){
+        for(let i = 0; i < poolDatabaseNames.length; i++){
         
             let promise = new Promise(function(resolvePool){ 
         
@@ -45,6 +82,7 @@ function startPool(){
             })
         
             promises.push(promise)                   
+            resolve()
             
         }
 
@@ -59,11 +97,11 @@ function startPool(){
             })
             .catch(() => {                
 
-                reject("Erro ao criar conexões no pool")
+                reject("Erro ao criar conexões no pool")                
             });                        
         })
         .catch(() => {            
-            reject("Erro ao adicionar no poool")
+            reject("Erro ao adicionar no poool")            
         })
 
     })
@@ -86,9 +124,28 @@ function handleDisconnects() {
                     if(err){
                         reject('Erro no banco de dados: ' + err);
                     }
+
                     else {
-                        log_("Database conectado! Aguardando conexões: " + poolDatabaseNames[i])
-                        resolve(poolDatabasesCon.push(con))
+                        log_("Database conectado: " + poolDatabaseNames[i])
+                        
+                        getInfoVendas(con)
+
+                        .then((result) => {
+                            
+                            log_("Salvando o resultado do database: " + poolDatabaseNames[i])
+
+                            popularExcel(result, poolDatabaseNames[i])
+                            .then(() => {
+
+                                resolve()
+                            })
+
+                        })
+
+                        .catch((error => {                
+                            resolve(error)
+                        }))
+
                     }
                     
                     
@@ -104,23 +161,15 @@ function handleDisconnects() {
         Promise.all(promises)
         .then(() => {
 
-            log_("Todos os bancos foram conectados com sucesso!")
-
-            iniciaRelatorio()
-
-            .then(() => {
-                resolve()
-            })
-            .catch((error) => {
-                reject(error)
-            });
+            log_("Todos os bancos foram conectados com sucesso!")     
+            process.exit(0)       
 
         })
         .catch((error) => {
-            reject(error)
+            resolve(error)
         });
 
-        })        
+    })        
 }
 
 function startInterface(){
@@ -128,12 +177,13 @@ function startInterface(){
 
     startPool()      
 
-    .then(() => {        
+    .then(() => {                              
+
         log_('Finalizado com sucesso')
 
     })
     .catch((error => {
-        log_(error)
+        log_(error)        
     }))
 }
 
@@ -141,63 +191,6 @@ function log_(str){
     let now = moment().format("DD/MM/YYYY hh:mm:ss")
     let msg = "[" + now + "] " + str
     console.log(msg)
-}
-
-function iniciaRelatorio(){
-
-    return new Promise(function(resolveFinal, rejectFinal){ 
-
-        log_('Iniciando relatório')
-
-        let promises = []
-
-        for(let i = 0; i < poolDatabasesCon.length; i++){
-
-            let promise = new Promise(function(resolve, reject){         
-
-                let con = poolDatabasesCon[i]
-
-                getInfoVendas(con)
-
-                .then((result) => {
-
-                    popularExcel(result)
-
-                    .then(() => {
-                        //workbook.write('Excel.xlsx');
-                        resolve()
-                    })
-                    
-                    .catch((error => {                
-                        reject(error)
-                    }))
-                    
-                })
-
-                .catch((error => {                
-                    reject(error)
-                }))
-                
-            })
-
-            promises.push(promise)        
-        }
-            
-        
-        Promise.all(promises)
-        .then(() => {
-            
-            resolveFinal("Todos os relatórios emitidos com sucesso")
-
-        })
-        .catch((error) => {
-
-            rejectFinal("Falha ao emitir relatório no banco de dados. Erro: " + error)
-        }); 
-
-        })
-
-       
 }
 
 function getInfoVendas(con){
@@ -215,15 +208,13 @@ function getInfoVendas(con){
                 ORDER BY 3a_log_vendas.data_log_venda DESC;"
 
 
-        log_(sql)
+        //log_(sql)
 
         con.query(sql, function (err, result) {        
             if (err){
-                console.log(err)
                 reject(err);
             }
-
-            con.end()
+            
             resolve(result)
 
         });
@@ -231,34 +222,75 @@ function getInfoVendas(con){
     })
 }
 
-function popularExcel(result){
+function popularExcel(result, poolDatabaseNames){
 
     return new Promise(function(resolve, reject){    
         
+        let promises = []
+
+        for(let i = 0; i < result.length; ++i){
+
+            let promise = new Promise(function(resolveExcel){ 
+
+                let data_log_venda = moment(result[i].data_log_venda).format("DD/MM/YYYY hh:mm:ss")
+                let data_log_utilizacao = moment(result[i].data_log_utilizacao).format("DD/MM/YYYY hh:mm:ss")
+                let fk_id_estoque_utilizavel = result[i].fk_id_estoque_utilizavel            
+                let nome_tipo_produto = result[i].nome_tipo_produto
+                let nome_subtipo_produto = result[i].nome_subtipo_produto
+                let valor_produto = result[i].valor_produto                                      
+
+                let col = 1                
         
-        if(result[0]){
+                worksheet.cell(rowGeral, col++).string(data_log_venda);
+                worksheet.cell(rowGeral, col++).string(data_log_utilizacao).style(style);
+                worksheet.cell(rowGeral, col++).number(fk_id_estoque_utilizavel).style(style)
+                worksheet.cell(rowGeral, col++).string(nome_tipo_produto).style(style);
+                worksheet.cell(rowGeral, col++).string(nome_subtipo_produto).style(style);
+                worksheet.cell(rowGeral, col++).number(valor_produto).style(style);                                                                                
 
-            let data_log_venda = result[0].data_log_venda
-            let data_log_utilizacao = result[0].data_log_utilizacao
-            let fk_id_estoque_utilizavel = result[0].fk_id_estoque_utilizavel            
-            let nome_tipo_produto = result[0].nome_tipo_produto
-            let nome_subtipo_produto = result[0].nome_subtipo_produto
-            let valor_produto = result[0].valor_produto                      
+                rowGeral++
+
+                console.log(rowGeral, data_log_venda, data_log_utilizacao, fk_id_estoque_utilizavel, nome_tipo_produto, nome_subtipo_produto, valor_produto)                            
+
+                resolveExcel(result.length)
+            })
             
-            console.log(data_log_venda, data_log_utilizacao, fk_id_estoque_utilizavel, nome_tipo_produto, nome_subtipo_produto, valor_produto)            
+
+            promises.push(promise)
+        }
+
+
+        Promise.all(promises)
+        .then((result) => {    
+
+
+            if(result.length > 0){
+                
+                let datetime = moment().format("DDMMYYYYhhmmss")
+                let filename = poolDatabaseNames + '_' + datetime + '.xlsx'
+                workbook.write(filename)
     
-           // worksheet.cell(1,1).string(data_log_venda).style(style);
-           // worksheet.cell(1,2).number(fk_id_estoque_utilizavel).style(style);
+                console.log(filename)
+    
+                setTimeout(() => {
+                    resolve("Sucesso ao adicionar gerar excel do banco " + poolDatabaseNames)
+                    
+                }, 3000)
+                
+            }
+            else {
+                resolve()
+            }
 
-
-            resolve()
-        }
-
-        else {
-            reject("Não foi possível realizar consulta no banco")
-        }
+            
+        })
+        .catch(() => {            
+            reject("Erro ao adicionar gerar excel do banco " + poolDatabaseNames)
+        })
         
     })
+
+
     
 }
 
