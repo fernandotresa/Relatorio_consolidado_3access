@@ -4,6 +4,57 @@ let app = express();
 var moment = require('moment');
 const xl = require('excel4node');
 
+var poolDatabases = []
+
+var diretorioArquivos = "/tmp/"
+var rowGeral = 2    
+//var dataInicio = moment().add(-1, 'month').format()
+//var dataFinal = moment().add(1, 'month').format()
+
+var dataInicio = moment("2020-01-15T00:00:00").format()
+var dataFinal = moment("2020-01-31T23:59:59").format()
+
+var workbook = new xl.Workbook();
+var worksheet = workbook.addWorksheet('Relatorio');
+
+var styleHeader = workbook.createStyle({
+    alignment: {
+        horizontal: 'center'
+    },
+    font: {
+        name: 'Arial',
+        bold: true,
+        color: '000000',
+        size: 11
+    },
+  }); 
+
+var style = workbook.createStyle({
+    alignment: {
+        horizontal: 'center'
+    },
+    font: {
+        name: 'Arial',
+        color: '000000',
+        size: 11
+    },    
+  }); 
+  
+  
+ var styleDinheiro = workbook.createStyle({
+    alignment: {
+        horizontal: 'center'
+    },
+    font: {
+        name: 'Arial',
+        color: '000000',
+        size: 11
+    },
+    numberFormat: 'R$#,##0.00; (R$#,##0.00); -',
+  });  
+
+  
+
 var poolDatabaseNames = [
         "3access", 
         "aguapei", 
@@ -40,43 +91,60 @@ var centroCusto = [
         "540007", 
         "540007", 
         "540007"
-    ]
+]
 
-var poolDatabases = []
+var clientNames = [
+    "3access", 
+    "Aguapei", 
+    "Anchieta", 
+    "Carlos Botelho", 
+    "Caverna Do Diabo", 
+    "Itatins", 
+    "Itingucu", 
+    "Morro Do Diabo", 
+    "Caminhos Do Mar",
+    "Caraguatatuba", 
+    "Cunha", 
+    "Picinguaba", 
+    "Santa Virginia", 
+    "Caboclos", 
+    "Ouro Grosso", 
+    "Santana"
+]
 
-var diretorioArquivos = "/tmp/"
-var rowGeral = 2    
-var dataInicio = moment().add(-1, 'month').format()
-var dataFinal = moment().add(1, 'month').format()
-var workbook = new xl.Workbook();
-var worksheet = workbook.addWorksheet('Relatorio');
+function startExcel(){
+    
+    worksheet.cell(1, 1).string('Data da Venda').style(styleHeader);
+    worksheet.cell(1, 2).string('Data do agendamento').style(styleHeader);
+    worksheet.cell(1, 3).string('Número do Pedido').style(styleHeader);
+    worksheet.cell(1, 4).string('Número de Ingresso').style(styleHeader);
+    worksheet.cell(1, 5).string('Tipo de Ingresso / Hospedagem').style(styleHeader);
+    worksheet.cell(1, 6).string('Tipo do Produto').style(styleHeader);
+    worksheet.cell(1, 7).string('Subtipo de Ingresso').style(styleHeader);
+    worksheet.cell(1, 8).string('Valor').style(styleHeader);
+    worksheet.cell(1, 9).string('Tipo de Pagamento').style(styleHeader); 
+    worksheet.cell(1, 10).string('Centro de Custo').style(styleHeader); 
+    worksheet.cell(1, 11).string('Nome do Parque').style(styleHeader); 
+    worksheet.cell(1, 12).string('Núcleo do Parque').style(styleHeader); 
+    worksheet.cell(1, 13).string('Data de Utilização').style(styleHeader);
 
-worksheet.cell(1, 1).string('Data de Compra');
-worksheet.cell(1, 2).string('Data de Uso');
-worksheet.cell(1, 3).string('Número do Pedido');
-worksheet.cell(1, 4).string('Número de Ingresso');
-worksheet.cell(1, 5).string('Tipo de Ingresso / Hospedagem');
-worksheet.cell(1, 6).string('Tipo do Produto');
-worksheet.cell(1, 6).string('Subtipo de Ingresso');
-worksheet.cell(1, 6).string('Valor');
-worksheet.cell(1, 6).string('Tipo de Pagamento'); 
-worksheet.cell(1, 6).string('Centro de Custo'); 
-worksheet.cell(1, 6).string('Nome do Parque'); 
-worksheet.cell(1, 6).string('Núcleo do Parque'); 
 
-worksheet.column(1).setWidth(25);
-worksheet.column(2).setWidth(25);
-worksheet.column(3).setWidth(25);
+    worksheet.column(1).setWidth(25);
+    worksheet.column(2).setWidth(25);
+    worksheet.column(3).setWidth(15);
+    worksheet.column(4).setWidth(25);
+    worksheet.column(5).setWidth(30);
+    worksheet.column(6).setWidth(30);
+    worksheet.column(7).setWidth(30);
+    worksheet.column(8).setWidth(15);
+    worksheet.column(9).setWidth(15);
+    worksheet.column(10).setWidth(25);
+    worksheet.column(11).setWidth(25);
+    worksheet.column(12).setWidth(25);
+    worksheet.column(13).setWidth(25);
 
-worksheet.row(1).setHeight(25);
-
-// Create a reusable style
-var style = workbook.createStyle({
-    font: {
-      color: '#FF0800',
-      size: 12
-    },
-  });   
+    worksheet.row(1).setHeight(25); 
+}
 
 function startPool(){    
 
@@ -91,7 +159,8 @@ function startPool(){
             let promise = new Promise(function(resolvePool){ 
         
                 var db_config = {
-                    host: "34.192.13.231",
+                    //host: "34.192.13.231",
+                    host: "3.212.93.86",                    
                     user: "root",
                     password: "Mudaragora00",
                     database: poolDatabaseNames[i]
@@ -150,15 +219,23 @@ function handleDisconnects() {
                         
                         getInfoVendas(con)
 
-                        .then((result) => {
-                            
-                            log_("Salvando o resultado do database: " + poolDatabaseNames[i])
+                        .then((result) => {                                                        
 
-                            popularExcel(result, i)
-                            .then(() => {
-
+                            if(result.length === 0){
+                                log_("Resultado vazio do database: " + poolDatabaseNames[i])                                
                                 resolve()
-                            })
+                            }
+                            else {
+
+                                log_("Salvando o resultado do database: " + poolDatabaseNames[i])
+
+                                popularExcel(result, i)
+                                .then(() => {
+
+                                    resolve()
+                                })
+
+                            }                            
 
                         })
 
@@ -181,8 +258,17 @@ function handleDisconnects() {
         Promise.all(promises)
         .then(() => {
 
-            log_("Todos os bancos foram conectados com sucesso!")     
-            process.exit(0)       
+            log_("Todos os bancos foram consultados com sucesso!")     
+
+            salvaExcel()
+
+            .then( ()=>{
+
+                log_("Finalizando o app. Tenha um ótimo dia!")     
+                process.exit(0)       
+            })
+            
+            
 
         })
         .catch((error) => {
@@ -192,19 +278,29 @@ function handleDisconnects() {
     })        
 }
 
+
+function salvaExcel(){
+
+    return new Promise(function(resolve, reject){
+
+        let filename = diretorioArquivos + 'Relatorio.xlsx'
+        console.log('Escrevendo no arquivo: ' + filename)    
+        
+        workbook.write(filename, function(err, stats) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(stats);               
+            }
+          });
+        
+    })    
+}
+
 function startInterface(){
     log_('Iniciando aplicativo. Preparando databases')
-
-    startPool()      
-
-    .then(() => {                              
-
-        log_('Finalizado com sucesso')
-
-    })
-    .catch((error => {
-        log_(error)        
-    }))
+    startExcel()
+    startPool()          
 }
 
 function log_(str){
@@ -220,15 +316,16 @@ function getInfoVendas(con){
 
         let sql = "SELECT * \
                 FROM 3a_log_vendas \
+                INNER JOIN 3a_estoque_utilizavel ON 3a_estoque_utilizavel.id_estoque_utilizavel = 3a_log_vendas.fk_id_estoque_utilizavel \
                 INNER JOIN 3a_produto ON 3a_produto.id_produto = 3a_log_vendas.fk_id_produto \
                 INNER JOIN 3a_tipo_produto ON 3a_tipo_produto.id_tipo_produto = 3a_produto.fk_id_tipo_produto \
                 INNER join 3a_subtipo_produto ON 3a_subtipo_produto.id_subtipo_produto = 3a_log_vendas.fk_id_subtipo_produto \
-                INNER JOIN 3a_log_utilizacao ON 3a_log_utilizacao.fk_id_estoque_utilizavel = 3a_log_vendas.fk_id_estoque_utilizavel \
+                LEFT JOIN 3a_log_utilizacao ON 3a_log_utilizacao.fk_id_estoque_utilizavel = 3a_log_vendas.fk_id_estoque_utilizavel \
                 WHERE 3a_log_vendas.data_log_venda BETWEEN '" + dataInicio + "' AND  '" + dataFinal + "' \
                 ORDER BY 3a_log_vendas.data_log_venda DESC;"
 
 
-        //log_(sql)
+        log_(sql)
 
         con.query(sql, function (err, result) {        
             if (err){
@@ -248,42 +345,89 @@ function popularExcel(result, index){
         
         let promises = []
 
-        for(let i = 0; i < result.length; ++i){
+        for(let i = 0; i < result.length; i++){
 
             let promise = new Promise(function(resolveExcel){ 
 
-                let data_log_venda = moment(result[i].data_log_venda).format("DD/MM/YYYY hh:mm:ss")
-                let data_log_utilizacao = moment(result[i].data_log_utilizacao).format("DD/MM/YYYY hh:mm:ss")
+                let data_log_venda =result[i].data_log_venda
+                let data_utilizacao = result[i].data_utilizacao
+                let data_log_utilizacao = result[i].data_log_utilizacao
                 let ip_maquina_venda = result[i].ip_maquina_venda
                 let tipoDeIngresso = "Ingressos"
-                let fk_id_estoque_utilizavel = result[i].fk_id_estoque_utilizavel            
+                let id_estoque_utilizavel = result[i].id_estoque_utilizavel            
                 let nome_tipo_produto = result[i].nome_tipo_produto
                 let nome_subtipo_produto = result[i].nome_subtipo_produto
                 let valor_produto = result[i].valor_produto         
-                let tipoPagamento = "Online"
+                let tipoPagamento = "ONLINE"
                 let centroCustoStr = centroCusto[index]
-                let nomeParque = "Núcleo Caminhos do Mar"
-                let nucleoParque = "PESM - Caminhos do Mar"                                
-                
+                let nomeParque = clientNames[index]
+                let nucleoParque = clientNames[index]     
+             
+                //console.log(rowGeral, id_estoque_utilizavel, data_log_venda, data_log_utilizacao, data_utilizacao, nome_tipo_produto, nome_subtipo_produto, valor_produto)                            
+
                 let col = 1                
+
+                if(! data_log_venda || data_log_venda.length === 0)
+                    worksheet.cell(rowGeral, col++).string("").style(style);
+                 else 
+                    worksheet.cell(rowGeral, col++).date(data_log_venda).style(style);                
+
+                if(! data_utilizacao || data_utilizacao.length === 0)
+                    worksheet.cell(rowGeral, col++).string("").style(style);
+                else 
+                    worksheet.cell(rowGeral, col++).date(data_utilizacao).style(style);                
         
-                worksheet.cell(rowGeral, col++).string(data_log_venda).style(style);
-                worksheet.cell(rowGeral, col++).string(data_log_utilizacao).style(style);
-                worksheet.cell(rowGeral, col++).string(ip_maquina_venda).style(style);                
-                worksheet.cell(rowGeral, col++).number(fk_id_estoque_utilizavel).style(style)
-                worksheet.cell(rowGeral, col++).string(tipoDeIngresso);
-                worksheet.cell(rowGeral, col++).string(nome_tipo_produto).style(style);
-                worksheet.cell(rowGeral, col++).string(nome_subtipo_produto).style(style);
-                worksheet.cell(rowGeral, col++).number(valor_produto).style(style);                                                                                
+                if(! ip_maquina_venda || ip_maquina_venda.length === 0)
+                    worksheet.cell(rowGeral, col++).string("").style(style);
+                else 
+                    worksheet.cell(rowGeral, col++).string(ip_maquina_venda).style(style);
+
+                if(! id_estoque_utilizavel || id_estoque_utilizavel.length === 0)
+                    worksheet.cell(rowGeral, col++).string("").style(style);
+                else 
+                    worksheet.cell(rowGeral, col++).number(id_estoque_utilizavel).style(style);
+
+                worksheet.cell(rowGeral, col++).string(tipoDeIngresso).style(style);                    
+                            
+                if(! nome_tipo_produto || nome_tipo_produto.length === 0)
+                    worksheet.cell(rowGeral, col++).string("").style(style);
+                else 
+                    worksheet.cell(rowGeral, col++).string(nome_tipo_produto).style(style);
+
+                if(! nome_subtipo_produto || nome_subtipo_produto.length === 0)
+                    worksheet.cell(rowGeral, col++).string("").style(style);
+                else 
+                    worksheet.cell(rowGeral, col++).string(nome_subtipo_produto).style(style);                                
+                
+                if(! valor_produto || valor_produto.length === 0)
+                    worksheet.cell(rowGeral, col++).string("R$ 0").style(style);
+                else 
+                    worksheet.cell(rowGeral, col++).number(valor_produto).style(styleDinheiro);
+
                 worksheet.cell(rowGeral, col++).string(tipoPagamento).style(style);
-                worksheet.cell(rowGeral, col++).string(centroCustoStr).style(style);
-                worksheet.cell(rowGeral, col++).string(nomeParque).style(style);
-                worksheet.cell(rowGeral, col++).string(nucleoParque).style(style);
+
+                if(! centroCustoStr || centroCustoStr.length === 0)
+                    worksheet.cell(rowGeral, col++).string("").style(style);
+                else 
+                    worksheet.cell(rowGeral, col++).string(centroCustoStr).style(style);
+                                                
+                if(! nomeParque || nomeParque.length === 0)
+                    worksheet.cell(rowGeral, col++).string("").style(style);
+                else 
+                    worksheet.cell(rowGeral, col++).string(nomeParque).style(style);             
+                
+                if(! nucleoParque || nucleoParque.length === 0)
+                    worksheet.cell(rowGeral, col++).string("").style(style);
+                else 
+                    worksheet.cell(rowGeral, col++).string(nucleoParque).style(style);
+
+                if(! data_log_utilizacao || nucleoParque.data_log_utilizacao === 0)
+                    worksheet.cell(rowGeral, col++).string("").style(style);
+                else 
+                    worksheet.cell(rowGeral, col++).date(data_log_utilizacao).style(style);
+                    
 
                 rowGeral++
-
-                console.log(rowGeral, data_log_venda, data_log_utilizacao, fk_id_estoque_utilizavel, nome_tipo_produto, nome_subtipo_produto, valor_produto)                            
-
                 resolveExcel(result.length)
             })
             
@@ -297,13 +441,7 @@ function popularExcel(result, index){
 
 
             if(result.length > 0){
-                
-                let datetime = moment().format("DDMMYYYYhhmmss")
-                let filename = diretorioArquivos + poolDatabaseNames[index] + '_' + datetime + '.xlsx'
-                workbook.write(filename)
-    
-                console.log(filename)
-    
+                                
                 setTimeout(() => {
                     resolve("Sucesso ao adicionar gerar excel do banco " + poolDatabaseNames[index])
                     
@@ -317,7 +455,7 @@ function popularExcel(result, index){
             
         })
         .catch(() => {            
-            reject("Erro ao adicionar gerar excel do banco " + poolDatabaseNames)
+            resolve("Erro ao adicionar gerar excel do banco " + poolDatabaseNames[index])
         })
         
     })
