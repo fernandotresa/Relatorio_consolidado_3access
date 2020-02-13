@@ -221,13 +221,12 @@ function handleDisconnects() {
 
                         .then((result) => {                                                        
 
-                            if(result.length === 0){
-                                log_("Resultado vazio do database: " + poolDatabaseNames[i])                                
+                            log_("Resultado do database: " + poolDatabaseNames[i] + '. Total: ' + result.length)  
+
+                            if(result.length === 0){                                    
                                 resolve()
                             }
-                            else {
-
-                                log_("Salvando o resultado do database: " + poolDatabaseNames[i])
+                            else {                                
 
                                 popularExcel(result, i)
                                 .then(() => {
@@ -316,22 +315,22 @@ function getInfoVendas(con){
 
         let sql = "SELECT * \
                 FROM 3a_log_vendas \
-                INNER JOIN 3a_estoque_utilizavel ON 3a_estoque_utilizavel.id_estoque_utilizavel = 3a_log_vendas.fk_id_estoque_utilizavel \
-                INNER JOIN 3a_produto ON 3a_produto.id_produto = 3a_log_vendas.fk_id_produto \
-                INNER JOIN 3a_tipo_produto ON 3a_tipo_produto.id_tipo_produto = 3a_produto.fk_id_tipo_produto \
-                INNER join 3a_subtipo_produto ON 3a_subtipo_produto.id_subtipo_produto = 3a_log_vendas.fk_id_subtipo_produto \
+                LEFT JOIN 3a_estoque_utilizavel ON 3a_estoque_utilizavel.id_estoque_utilizavel = 3a_log_vendas.fk_id_estoque_utilizavel \
+                LEFT JOIN 3a_produto ON 3a_produto.id_produto = 3a_log_vendas.fk_id_produto \
+                LEFT JOIN 3a_tipo_produto ON 3a_tipo_produto.id_tipo_produto = 3a_produto.fk_id_tipo_produto \
+                LEFT join 3a_subtipo_produto ON 3a_subtipo_produto.id_subtipo_produto = 3a_log_vendas.fk_id_subtipo_produto \
                 LEFT JOIN 3a_log_utilizacao ON 3a_log_utilizacao.fk_id_estoque_utilizavel = 3a_log_vendas.fk_id_estoque_utilizavel \
-                WHERE 3a_log_vendas.data_log_venda BETWEEN '" + dataInicio + "' AND  '" + dataFinal + "' \
-                ORDER BY 3a_log_vendas.data_log_venda DESC;"
+                WHERE 3a_log_vendas.data_log_venda BETWEEN '" + dataInicio + "' AND  '" + dataFinal + "';"
 
 
-        log_(sql)
+        //log_(sql)
 
         con.query(sql, function (err, result) {        
             if (err){
                 reject(err);
             }
             
+
             resolve(result)
 
         });
@@ -339,31 +338,35 @@ function getInfoVendas(con){
     })
 }
 
-function popularExcel(result, index){
+async function popularExcel(result, index){
 
     return new Promise(function(resolve, reject){    
         
         let promises = []
 
-        for(let i = 0; i < result.length; i++){
+        for(var i = 0; i < result.length; i++){  
+            
+            rowGeral++
 
             let promise = new Promise(function(resolveExcel){ 
 
-                let data_log_venda =result[i].data_log_venda
-                let data_utilizacao = result[i].data_utilizacao
-                let data_log_utilizacao = result[i].data_log_utilizacao
-                let ip_maquina_venda = result[i].ip_maquina_venda
+                let element = result[i]
+                
+                let data_log_venda = element.data_log_venda
+                let data_utilizacao = element.data_utilizacao
+                let data_log_utilizacao = element.data_log_utilizacao
+                let ip_maquina_venda = element.ip_maquina_venda
                 let tipoDeIngresso = "Ingressos"
-                let id_estoque_utilizavel = result[i].id_estoque_utilizavel            
-                let nome_tipo_produto = result[i].nome_tipo_produto
-                let nome_subtipo_produto = result[i].nome_subtipo_produto
-                let valor_produto = result[i].valor_produto         
+                let id_estoque_utilizavel = element.id_estoque_utilizavel            
+                let nome_tipo_produto = element.nome_tipo_produto
+                let nome_subtipo_produto = element.nome_subtipo_produto
+                let valor_produto = element.valor_produto         
                 let tipoPagamento = "ONLINE"
                 let centroCustoStr = centroCusto[index]
                 let nomeParque = clientNames[index]
                 let nucleoParque = clientNames[index]     
              
-                //console.log(rowGeral, id_estoque_utilizavel, data_log_venda, data_log_utilizacao, data_utilizacao, nome_tipo_produto, nome_subtipo_produto, valor_produto)                            
+                console.log(nomeParque, rowGeral, id_estoque_utilizavel, data_log_venda, data_log_utilizacao, data_utilizacao, nome_tipo_produto, nome_subtipo_produto, valor_produto)                            
 
                 let col = 1                
 
@@ -426,8 +429,7 @@ function popularExcel(result, index){
                 else 
                     worksheet.cell(rowGeral, col++).date(data_log_utilizacao).style(style);
                     
-
-                rowGeral++
+                        
                 resolveExcel(result.length)
             })
             
@@ -436,15 +438,14 @@ function popularExcel(result, index){
         }
 
 
-        Promise.all(promises)
+     Promise.all(promises)
         .then((result) => {    
 
 
             if(result.length > 0){
                                 
                 setTimeout(() => {
-                    resolve("Sucesso ao adicionar gerar excel do banco " + poolDatabaseNames[index])
-                    
+                    resolve("Sucesso ao adicionar gerar excel do banco " + poolDatabaseNames[index])                    
                 }, 3000)
                 
             }
