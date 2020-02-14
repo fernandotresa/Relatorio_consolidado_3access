@@ -2,7 +2,7 @@ let mysql = require('mysql');
 let express =  require('express');
 let app = express();
 var moment = require('moment');
-const xl = require('excel4node');
+const ExcelJS = require('exceljs');
 
 var poolDatabases = []
 
@@ -11,49 +11,11 @@ var rowGeral = 2
 //var dataInicio = moment().add(-1, 'month').format()
 //var dataFinal = moment().add(1, 'month').format()
 
-var dataInicio = moment("2020-01-15T00:00:00").format()
+var dataInicio = moment("2020-01-16T00:00:00").format()
 var dataFinal = moment("2020-01-31T23:59:59").format()
 
-var workbook = new xl.Workbook();
-var worksheet = workbook.addWorksheet('Relatorio');
-
-var styleHeader = workbook.createStyle({
-    alignment: {
-        horizontal: 'center'
-    },
-    font: {
-        name: 'Arial',
-        bold: true,
-        color: '000000',
-        size: 11
-    },
-  }); 
-
-var style = workbook.createStyle({
-    alignment: {
-        horizontal: 'center'
-    },
-    font: {
-        name: 'Arial',
-        color: '000000',
-        size: 11
-    },    
-  }); 
-  
-  
- var styleDinheiro = workbook.createStyle({
-    alignment: {
-        horizontal: 'center'
-    },
-    font: {
-        name: 'Arial',
-        color: '000000',
-        size: 11
-    },
-    numberFormat: 'R$#,##0.00; (R$#,##0.00); -',
-  });  
-
-  
+var workbook = new ExcelJS.Workbook();
+var worksheet = workbook.addWorksheet('Relatório Consolidado');
 
 var poolDatabaseNames = [
         "3access", 
@@ -113,37 +75,23 @@ var clientNames = [
 ]
 
 function startExcel(){
-    
-    worksheet.cell(1, 1).string('Data da Venda').style(styleHeader);
-    worksheet.cell(1, 2).string('Data do agendamento').style(styleHeader);
-    worksheet.cell(1, 3).string('Número do Pedido').style(styleHeader);
-    worksheet.cell(1, 4).string('Número de Ingresso').style(styleHeader);
-    worksheet.cell(1, 5).string('Tipo de Ingresso / Hospedagem').style(styleHeader);
-    worksheet.cell(1, 6).string('Tipo do Produto').style(styleHeader);
-    worksheet.cell(1, 7).string('Subtipo de Ingresso').style(styleHeader);
-    worksheet.cell(1, 8).string('Valor').style(styleHeader);
-    worksheet.cell(1, 9).string('Tipo de Pagamento').style(styleHeader); 
-    worksheet.cell(1, 10).string('Centro de Custo').style(styleHeader); 
-    worksheet.cell(1, 11).string('Nome do Parque').style(styleHeader); 
-    worksheet.cell(1, 12).string('Núcleo do Parque').style(styleHeader); 
-    worksheet.cell(1, 13).string('Data de Utilização').style(styleHeader);
 
 
-    worksheet.column(1).setWidth(25);
-    worksheet.column(2).setWidth(25);
-    worksheet.column(3).setWidth(15);
-    worksheet.column(4).setWidth(25);
-    worksheet.column(5).setWidth(30);
-    worksheet.column(6).setWidth(30);
-    worksheet.column(7).setWidth(30);
-    worksheet.column(8).setWidth(15);
-    worksheet.column(9).setWidth(15);
-    worksheet.column(10).setWidth(25);
-    worksheet.column(11).setWidth(25);
-    worksheet.column(12).setWidth(25);
-    worksheet.column(13).setWidth(25);
-
-    worksheet.row(1).setHeight(25); 
+    worksheet.columns = [
+        { header: 'Data da Venda', key: 'data_log_venda', width: 25 },
+        { header: 'Data do agendamento', key: 'data_utilizacao', width: 25 },
+        { header: 'Número do Pedido', key: 'ip_maquina_venda', width: 25 },
+        { header: 'Número de Ingresso', key: 'id_estoque_utilizavel', width: 25 },
+        { header: 'Tipo de Ingresso / Hospedagem', key: 'tipoDeIngresso', width: 25 },
+        { header: 'Tipo do Produto', key: 'nome_tipo_produto', width: 25 },
+        { header: 'Subtipo de Ingresso', key: 'nome_subtipo_produto', width: 25 },
+        { header: 'Valor', key: 'valor_produto', width: 25 },
+        { header: 'Tipo de Pagamento', key: 'tipoPagamento', width: 25 },
+        { header: 'Centro de Custo', key: 'centroCustoStr', width: 25 },
+        { header: 'Nome do Parque', key: 'nomeParque', width: 25 },
+        { header: 'Núcleo do Parque', key: 'nucleoParque', width: 25 },
+        { header: 'Data de Utilização', key: 'data_log_utilizacao', width: 25 }        
+      ];        
 }
 
 function startPool(){    
@@ -285,13 +233,11 @@ function salvaExcel(){
         let filename = diretorioArquivos + 'Relatorio.xlsx'
         console.log('Escrevendo no arquivo: ' + filename)    
         
-        workbook.write(filename, function(err, stats) {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(stats);               
-            }
-          });
+        workbook.xlsx.writeFile(filename)
+        .then(() => {
+            
+            resolve()
+        })            
         
     })    
 }
@@ -368,69 +314,25 @@ async function popularExcel(result, index){
              
                 console.log(nomeParque, rowGeral, id_estoque_utilizavel, data_log_venda, data_log_utilizacao, data_utilizacao, nome_tipo_produto, nome_subtipo_produto, valor_produto)                            
 
-                let col = 1                
+                worksheet.addRow({id: 1, 
+                        data_log_venda: data_log_venda, 
+                        data_utilizacao: data_utilizacao, 
+                        ip_maquina_venda: ip_maquina_venda, 
+                        id_estoque_utilizavel: id_estoque_utilizavel, 
+                        tipoDeIngresso: tipoDeIngresso, 
+                        nome_tipo_produto: nome_tipo_produto, 
+                        nome_subtipo_produto: nome_subtipo_produto, 
+                        valor_produto: valor_produto, 
+                        tipoPagamento: tipoPagamento, 
+                        centroCustoStr: centroCustoStr, 
+                        nomeParque: nomeParque, 
+                        nucleoParque: nucleoParque, 
+                        data_log_utilizacao: data_log_utilizacao
 
-                if(! data_log_venda || data_log_venda.length === 0)
-                    worksheet.cell(rowGeral, col++).string("").style(style);
-                 else 
-                    worksheet.cell(rowGeral, col++).date(data_log_venda).style(style);                
-
-                if(! data_utilizacao || data_utilizacao.length === 0)
-                    worksheet.cell(rowGeral, col++).string("").style(style);
-                else 
-                    worksheet.cell(rowGeral, col++).date(data_utilizacao).style(style);                
-        
-                if(! ip_maquina_venda || ip_maquina_venda.length === 0)
-                    worksheet.cell(rowGeral, col++).string("").style(style);
-                else 
-                    worksheet.cell(rowGeral, col++).string(ip_maquina_venda).style(style);
-
-                if(! id_estoque_utilizavel || id_estoque_utilizavel.length === 0)
-                    worksheet.cell(rowGeral, col++).string("").style(style);
-                else 
-                    worksheet.cell(rowGeral, col++).number(id_estoque_utilizavel).style(style);
-
-                worksheet.cell(rowGeral, col++).string(tipoDeIngresso).style(style);                    
-                            
-                if(! nome_tipo_produto || nome_tipo_produto.length === 0)
-                    worksheet.cell(rowGeral, col++).string("").style(style);
-                else 
-                    worksheet.cell(rowGeral, col++).string(nome_tipo_produto).style(style);
-
-                if(! nome_subtipo_produto || nome_subtipo_produto.length === 0)
-                    worksheet.cell(rowGeral, col++).string("").style(style);
-                else 
-                    worksheet.cell(rowGeral, col++).string(nome_subtipo_produto).style(style);                                
-                
-                if(! valor_produto || valor_produto.length === 0)
-                    worksheet.cell(rowGeral, col++).string("R$ 0").style(style);
-                else 
-                    worksheet.cell(rowGeral, col++).number(valor_produto).style(styleDinheiro);
-
-                worksheet.cell(rowGeral, col++).string(tipoPagamento).style(style);
-
-                if(! centroCustoStr || centroCustoStr.length === 0)
-                    worksheet.cell(rowGeral, col++).string("").style(style);
-                else 
-                    worksheet.cell(rowGeral, col++).string(centroCustoStr).style(style);
-                                                
-                if(! nomeParque || nomeParque.length === 0)
-                    worksheet.cell(rowGeral, col++).string("").style(style);
-                else 
-                    worksheet.cell(rowGeral, col++).string(nomeParque).style(style);             
-                
-                if(! nucleoParque || nucleoParque.length === 0)
-                    worksheet.cell(rowGeral, col++).string("").style(style);
-                else 
-                    worksheet.cell(rowGeral, col++).string(nucleoParque).style(style);
-
-                if(! data_log_utilizacao || nucleoParque.data_log_utilizacao === 0)
-                    worksheet.cell(rowGeral, col++).string("").style(style);
-                else 
-                    worksheet.cell(rowGeral, col++).date(data_log_utilizacao).style(style);
+                    })
                     
                         
-                resolveExcel(result.length)
+                 resolveExcel()
             })
             
 
@@ -442,16 +344,7 @@ async function popularExcel(result, index){
         .then((result) => {    
 
 
-            if(result.length > 0){
-                                
-                setTimeout(() => {
-                    resolve("Sucesso ao adicionar gerar excel do banco " + poolDatabaseNames[index])                    
-                }, 3000)
-                
-            }
-            else {
-                resolve()
-            }
+            resolve("Sucesso ao adicionar gerar excel do banco " + poolDatabaseNames[index])                    
 
             
         })
