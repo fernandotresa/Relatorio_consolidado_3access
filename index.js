@@ -36,46 +36,7 @@ var poolDatabaseNames = [
         "petar_santana"
     ]
 
-var centroCusto = [
-        "540007", 
-        "540007", 
-        "540007", 
-        "540007", 
-        "540007", 
-        "540007", 
-        "540007", 
-        "540007", 
-        "540007",
-        "540007", 
-        "540007", 
-        "540007", 
-        "540007", 
-        "540007", 
-        "540007", 
-        "540007"
-]
-
-var clientNames = [
-    "3access", 
-    "Aguapei", 
-    "Anchieta", 
-    "Carlos Botelho", 
-    "Caverna Do Diabo", 
-    "Itatins", 
-    "Itingucu", 
-    "Morro Do Diabo", 
-    "Caminhos Do Mar",
-    "Caraguatatuba", 
-    "Cunha", 
-    "Picinguaba", 
-    "Santa Virginia", 
-    "Caboclos", 
-    "Ouro Grosso", 
-    "Santana"
-]
-
 function startExcel(){
-
 
     worksheet.columns = [
         { header: 'Data da Venda', key: 'data_log_venda', width: 25 },
@@ -89,7 +50,7 @@ function startExcel(){
         { header: 'Tipo de Pagamento', key: 'tipoPagamento', width: 25 },
         { header: 'Centro de Custo', key: 'centroCustoStr', width: 25 },
         { header: 'Nome do Parque', key: 'nomeParque', width: 25 },
-        { header: 'Núcleo do Parque', key: 'nucleoParque', width: 25 },
+        { header: 'Núcleo do Parque', key: 'nucleoParque', width: 50 },
         { header: 'Data de Utilização', key: 'data_log_utilizacao', width: 25 }        
       ];        
 }
@@ -265,6 +226,7 @@ function getInfoVendas(con){
                 LEFT JOIN 3a_produto ON 3a_produto.id_produto = 3a_log_vendas.fk_id_produto \
                 LEFT JOIN 3a_tipo_produto ON 3a_tipo_produto.id_tipo_produto = 3a_produto.fk_id_tipo_produto \
                 LEFT join 3a_subtipo_produto ON 3a_subtipo_produto.id_subtipo_produto = 3a_log_vendas.fk_id_subtipo_produto \
+                LEFT JOIN 3a_tipo_pagamento ON 3a_tipo_pagamento.id_tipo_pagamento = 3a_log_vendas.fk_id_tipo_pagamento \
                 LEFT JOIN 3a_log_utilizacao ON 3a_log_utilizacao.fk_id_estoque_utilizavel = 3a_log_vendas.fk_id_estoque_utilizavel \
                 WHERE 3a_log_vendas.data_log_venda BETWEEN '" + dataInicio + "' AND  '" + dataFinal + "';"
 
@@ -301,20 +263,23 @@ async function popularExcel(result, index){
                 let data_log_venda = element.data_log_venda
                 let data_utilizacao = element.data_utilizacao
                 let data_log_utilizacao = element.data_log_utilizacao
-                let ip_maquina_venda = element.ip_maquina_venda
-                let tipoDeIngresso = "Ingressos"
-                let id_estoque_utilizavel = element.id_estoque_utilizavel            
+                let ip_maquina_venda = element.ip_maquina_venda                
+                let id_estoque_utilizavel = element.id_estoque_utilizavel                            
                 let nome_tipo_produto = element.nome_tipo_produto
                 let nome_subtipo_produto = element.nome_subtipo_produto
                 let valor_produto = element.valor_produto         
-                let tipoPagamento = "ONLINE"
-                let centroCustoStr = centroCusto[index]
-                let nomeParque = clientNames[index]
-                let nucleoParque = clientNames[index]     
-             
-                console.log(nomeParque, rowGeral, id_estoque_utilizavel, data_log_venda, data_log_utilizacao, data_utilizacao, nome_tipo_produto, nome_subtipo_produto, valor_produto)                            
+                let tipoPagamento = element.nome_tipo_pagamento
+                let centroCustoStr = element.centro_de_custo
+                let nomeParque = element.nome_do_parque
+                let nucleoParque = element.nucleo_do_parque
+                let nome_produto = element.nome_produto
+                let tipoDeIngresso = nome_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
 
-                worksheet.addRow({id: 1, 
+             
+                console.log(rowGeral, id_estoque_utilizavel, tipoDeIngresso, nomeParque, centroCustoStr,  nucleoParque)                            
+
+                worksheet.addRow({
+                        id: 1, 
                         data_log_venda: data_log_venda, 
                         data_utilizacao: data_utilizacao, 
                         ip_maquina_venda: ip_maquina_venda, 
