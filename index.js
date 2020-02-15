@@ -11,8 +11,8 @@ var rowGeral = 2
 //var dataInicio = moment().add(-1, 'month').format()
 //var dataFinal = moment().add(1, 'month').format()
 
-var dataInicio = moment("2020-01-16T00:00:00").format()
-var dataFinal = moment("2020-01-31T23:59:59").format()
+var dataInicio = moment("2020-01-01T00:00:00").format()
+var dataFinal = moment("2020-01-15T23:59:59").format()
 
 var workbook = new ExcelJS.Workbook();
 var worksheet = workbook.addWorksheet('Relatório Consolidado');
@@ -50,7 +50,7 @@ function startExcel(){
         { header: 'Tipo de Pagamento', key: 'tipoPagamento', width: 25 },
         { header: 'Centro de Custo', key: 'centroCustoStr', width: 25 },
         { header: 'Nome do Parque', key: 'nomeParque', width: 25 },
-        { header: 'Núcleo do Parque', key: 'nucleoParque', width: 50 },
+        { header: 'Núcleo do Parque', key: 'nucleoParque', width: 35 },
         { header: 'Data de Utilização', key: 'data_log_utilizacao', width: 25 }        
       ];        
 }
@@ -274,6 +274,9 @@ async function popularExcel(result, index){
                 let nucleoParque = element.nucleo_do_parque
                 let nome_produto = element.nome_produto
                 let tipoDeIngresso = nome_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
+
+                if(data_utilizacao.length === 0)
+                    data_utilizacao = data_log_venda
 
              
                 console.log(rowGeral, id_estoque_utilizavel, tipoDeIngresso, nomeParque, centroCustoStr,  nucleoParque)                            
