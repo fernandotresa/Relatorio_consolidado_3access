@@ -277,7 +277,7 @@ async function popularExcel(result, index){
                 let nome_produto = element.nome_produto
                 let tipoDeIngresso = nome_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
 
-                if(data_utilizacao.length === 0)
+                if(data_utilizacao.length === 0 || data_utilizacao === '0000-00-00 00:00:00')
                     data_utilizacao = data_log_venda
 
              
