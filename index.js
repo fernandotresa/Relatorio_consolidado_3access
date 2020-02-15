@@ -11,8 +11,8 @@ var rowGeral = 2
 //var dataInicio = moment().add(-1, 'month').format()
 //var dataFinal = moment().add(1, 'month').format()
 
-var dataInicio = moment("2020-01-01T00:00:00").format()
-var dataFinal = moment("2020-01-15T23:59:59").format()
+var dataInicio = moment("2020-01-16T00:00:00").format()
+var dataFinal = moment("2020-01-31T23:59:59").format()
 
 var workbook = new ExcelJS.Workbook();
 var worksheet = workbook.addWorksheet('Relatório Consolidado');
@@ -252,6 +252,8 @@ async function popularExcel(result, index){
         
         let promises = []
 
+        log_("Populando excel para: " + poolDatabaseNames[index] + '. Total: ' + result.length)  
+
         for(var i = 0; i < result.length; i++){  
             
             rowGeral++
@@ -279,7 +281,7 @@ async function popularExcel(result, index){
                     data_utilizacao = data_log_venda
 
              
-                console.log(rowGeral, id_estoque_utilizavel, tipoDeIngresso, nomeParque, centroCustoStr,  nucleoParque)                            
+               // console.log(rowGeral, id_estoque_utilizavel, tipoDeIngresso, nomeParque, centroCustoStr,  nucleoParque)                            
 
                 worksheet.addRow({
                         id: 1, 
