@@ -18,7 +18,7 @@ var workbook = new ExcelJS.Workbook();
 var worksheet = workbook.addWorksheet('Relatório Consolidado');
 
 var poolDatabaseNames = [
-        "3access", 
+        "intervales", 
         "aguapei", 
         "anchieta", 
         "carlosbotelho", 
