@@ -3,19 +3,26 @@ let express =  require('express');
 let app = express();
 var moment = require('moment');
 const ExcelJS = require('exceljs');
+let bodyParser = require('body-parser');
+let logger = require('morgan');
+let methodOverride = require('method-override')
+let cors = require('cors');
 
-var poolDatabases = []
+let http = require('http').Server(app);
 
-var diretorioArquivos = "/tmp/"
-var rowGeral = 2    
-//var dataInicio = moment().add(-1, 'month').format()
-//var dataFinal = moment().add(1, 'month').format()
-
-var dataInicio = moment("2020-01-16T00:00:00").format()
-var dataFinal = moment("2020-01-31T23:59:59").format()
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(methodOverride());
+app.use(cors());
 
 var workbook = new ExcelJS.Workbook();
 var worksheet = workbook.addWorksheet('Relatório Consolidado');
+
+var poolDatabases = []
+var poolConnections = []
+var diretorioArquivos = "/tmp/"
+
+var conPrincipal
 
 var poolDatabaseNames = [
         "intervales", 
@@ -35,6 +42,29 @@ var poolDatabaseNames = [
         "petar_ouro_grosso", 
         "petar_santana"
     ]
+
+function iniciaDbPrincipal(){
+
+    var db_config = {
+        host: "3.212.93.86",                    
+        user: "root",
+        password: "Mudaragora00",
+        database: "relatorios"
+    };
+    
+    conPrincipal = mysql.createConnection(db_config);               
+    
+    conPrincipal.connect(function(err) {
+        if(err){
+            log_('Erro no banco de dados de relatórios: ' + err);
+        }
+    
+        else {
+            log_("Database relatórios conectado com sucesso")   
+        }                                        
+    });
+    
+}
 
 function startExcel(){
 
@@ -59,7 +89,7 @@ function startPool(){
 
     return new Promise(function(resolve, reject){ 
 
-        log_('Iniciando Pool de banco de dados: ' + poolDatabaseNames)
+        log_('Iniciando Pool de banco de dados: ' + poolDatabaseNames + '. Total: ' + poolDatabaseNames.length)
 
         let promises = []
 
@@ -68,7 +98,6 @@ function startPool(){
             let promise = new Promise(function(resolvePool){ 
         
                 var db_config = {
-                    //host: "34.192.13.231",
                     host: "3.212.93.86",                    
                     user: "root",
                     password: "Mudaragora00",
@@ -80,7 +109,6 @@ function startPool(){
             })
         
             promises.push(promise)                   
-            resolve()
             
         }
 
@@ -124,36 +152,11 @@ function handleDisconnects() {
                     }
 
                     else {
-                        log_("Database conectado: " + poolDatabaseNames[i])
-                        
-                        getInfoVendas(con)
+                        log_("Database conectado: " + poolDatabaseNames[i])   
+                        poolConnections.push(con)                                             
+                        resolve()
 
-                        .then((result) => {                                                        
-
-                            log_("Resultado do database: " + poolDatabaseNames[i] + '. Total: ' + result.length)  
-
-                            if(result.length === 0){                                    
-                                resolve()
-                            }
-                            else {                                
-
-                                popularExcel(result, i)
-                                .then(() => {
-
-                                    resolve()
-                                })
-
-                            }                            
-
-                        })
-
-                        .catch((error => {                
-                            resolve(error)
-                        }))
-
-                    }
-                    
-                    
+                    }                                        
                 });
                 
             })
@@ -167,20 +170,12 @@ function handleDisconnects() {
         .then(() => {
 
             log_("Todos os bancos foram consultados com sucesso!")     
-
-            salvaExcel()
-
-            .then( ()=>{
-
-                log_("Finalizando o app. Tenha um ótimo dia!")     
-                process.exit(0)       
-            })
+            resolve()
             
-            
-
         })
         .catch((error) => {
-            resolve(error)
+            console.log(error)
+            reject(error)
         });
 
     })        
@@ -203,10 +198,142 @@ function salvaExcel(){
     })    
 }
 
-function startInterface(){
-    log_('Iniciando aplicativo. Preparando databases')
+function startInterface(){    
+    log_('Iniciando aplicativo. Preparando databases')   
+    
+    iniciaDbPrincipal()
+
     startExcel()
-    startPool()          
+
+    startPool()
+
+    .then(() => {
+
+        log_("Banco de dados iniciados com sucesso. Escutando conexoes...")        
+        http.listen(8085);  
+    })    
+}
+
+function geraRelatorio(req, res){
+        
+    let promises = []
+
+    salvaRelatorio(req)
+
+    .then((datetime) => {
+
+        log_("Identificação do relatório: " + datetime)
+
+        for(let i = 0; i < poolConnections.length; i++){            
+            let promise = iniciaRelatorio(i, req)
+            promises.push(promise)
+        }    
+        
+        Promise.all(promises)
+    
+            .then(() => {    
+    
+                salvaExcel()
+                .then(() => {
+    
+                    finalizaRelatorio(datetime)
+
+                    .then(() => {
+
+                        res.json({"success": true});     
+                    })
+                    
+                })
+                
+        }) 
+
+    })       
+}
+
+
+function salvaRelatorio(req){
+
+    return new Promise(function(resolve, reject){ 
+
+        let datetime = moment().format("YYYY-MM-DDThh:mm:ss")
+
+        var sql = "INSERT INTO consolidados (datetime, dataInicio, dataFim) \
+                VALUES ('" + datetime + "', '" + req.body.dataInicial + "', '" + req.body.dataFinal + "')"
+
+        log_(sql)
+        
+        conPrincipal.query(sql, function (err, result) {        
+            if (err){
+                reject(err);
+            }
+
+            resolve(datetime)
+
+        });
+    })
+
+}
+
+function finalizaRelatorio(datetime){
+
+    return new Promise(function(resolve, reject){         
+
+        var sql = "UPDATE consolidados SET \
+                dataFim = '" + moment().format("YYYY-MM-DDThh:mm:ss") + "',\
+                status = 'Finalizado' \
+            WHERE datetime = '" + datetime + "'"
+
+        log_(sql)
+        
+        conPrincipal.query(sql, function (err, result) {        
+            if (err){
+                reject(err);
+            }
+
+            resolve(datetime)
+
+        });
+    })
+
+}
+
+
+function iniciaRelatorio(index, req){
+
+    return new Promise(function(resolve, reject){     
+        
+        let con = poolConnections[index]
+
+        getInfoVendas(con, req)
+
+        .then((result) => {        
+            
+            log_("Total da consulta do banco " + poolDatabaseNames[index] + '. Total: ' + result.length)
+            
+            if(result.length === 0){                                    
+                log_("Resultado vazio para o banco " + poolDatabaseNames[index])
+                resolve()
+            }
+            else {                                
+
+                log_("Gerando relatório do banco " + poolDatabaseNames[index])
+
+                popularExcel(result)
+
+                .then(() => {
+                    resolve()   
+                })
+
+            }                            
+        })
+
+        .catch((error => {            
+            log_(error)    
+        })) 
+
+    })
+
+    
 }
 
 function log_(str){
@@ -215,10 +342,13 @@ function log_(str){
     console.log(msg)
 }
 
-function getInfoVendas(con){
+function getInfoVendas(con, req){
 
 
     return new Promise(function(resolve, reject){
+
+        var dataInicio = moment(req.body.dataInicial).format()
+        var dataFinal = moment(req.body.dataFinal).format()   
 
         let sql = "SELECT * \
                 FROM 3a_log_vendas \
@@ -231,13 +361,12 @@ function getInfoVendas(con){
                 WHERE 3a_log_vendas.data_log_venda BETWEEN '" + dataInicio + "' AND  '" + dataFinal + "';"
 
 
-        //log_(sql)
+        log_(sql)
 
         con.query(sql, function (err, result) {        
             if (err){
                 reject(err);
             }
-            
 
             resolve(result)
 
@@ -246,18 +375,14 @@ function getInfoVendas(con){
     })
 }
 
-async function popularExcel(result, index){
+async function popularExcel(result){
 
     return new Promise(function(resolve, reject){    
         
         let promises = []
 
-        log_("Populando excel para: " + poolDatabaseNames[index] + '. Total: ' + result.length)  
-
         for(var i = 0; i < result.length; i++){  
             
-            rowGeral++
-
             let promise = new Promise(function(resolveExcel){ 
 
                 let element = result[i]
@@ -281,7 +406,7 @@ async function popularExcel(result, index){
                     data_utilizacao = data_log_venda
 
              
-               // console.log(rowGeral, id_estoque_utilizavel, tipoDeIngresso, nomeParque, centroCustoStr,  nucleoParque)                            
+                //console.log(id_estoque_utilizavel, tipoDeIngresso, nomeParque, centroCustoStr,  nucleoParque)                            
 
                 worksheet.addRow({
                         id: 1, 
@@ -311,23 +436,32 @@ async function popularExcel(result, index){
 
 
      Promise.all(promises)
-        .then((result) => {    
+        .then(() => {    
+            resolve()                    
 
-
-            resolve("Sucesso ao adicionar gerar excel do banco " + poolDatabaseNames[index])                    
 
             
         })
         .catch(() => {            
-            resolve("Erro ao adicionar gerar excel do banco " + poolDatabaseNames[index])
+            resolve()
         })
         
-    })
-
-
-    
+    })    
 }
 
+app.post('/novoRelatorio', function(req, res) {
+    geraRelatorio(req, res)                     
+});
 
-startInterface();
+app.post('/pegaRelatorio', function(req, res) {
+    getSessionsTicketTotal(req, res)                 
+});
+
+process.on('SIGINT', function() {
+    console.log("Caught interrupt signal");
+    process.exit();
+});
+
+startInterface()
+
 
