@@ -15,15 +15,16 @@ app.use(bodyParser.json());
 app.use(methodOverride());
 app.use(cors());
 
-var workbook = new ExcelJS.Workbook();
-var worksheet = workbook.addWorksheet('Relatório Consolidado');
-
 var poolDatabases = []
 var poolConnections = []
 var diretorioArquivos = "/var/www/html/relatorios_arquivos/"
+//var diretorioArquivos = "/tmp/"
 var diretorioArquivosUrl = "/relatorios_arquivos/"
 
 var conPrincipal
+
+var workbook
+var worksheet
 
 var poolDatabaseNames = [
         "intervales", 
@@ -69,21 +70,32 @@ function iniciaDbPrincipal(){
 
 function startExcel(){
 
-    worksheet.columns = [
-        { header: 'Data da Venda', key: 'data_log_venda', width: 25 },
-        { header: 'Data do agendamento', key: 'data_utilizacao', width: 25 },
-        { header: 'Número do Pedido', key: 'ip_maquina_venda', width: 25 },
-        { header: 'Número de Ingresso', key: 'id_estoque_utilizavel', width: 25 },
-        { header: 'Tipo de Ingresso / Hospedagem', key: 'tipoDeIngresso', width: 25 },
-        { header: 'Tipo do Produto', key: 'nome_tipo_produto', width: 25 },
-        { header: 'Subtipo de Ingresso', key: 'nome_subtipo_produto', width: 25 },
-        { header: 'Valor', key: 'valor_produto', width: 25 },
-        { header: 'Tipo de Pagamento', key: 'tipoPagamento', width: 25 },
-        { header: 'Centro de Custo', key: 'centroCustoStr', width: 25 },
-        { header: 'Nome do Parque', key: 'nomeParque', width: 25 },
-        { header: 'Núcleo do Parque', key: 'nucleoParque', width: 35 },
-        { header: 'Data de Utilização', key: 'data_log_utilizacao', width: 25 }        
-      ];        
+    return new Promise(function(resolve){ 
+
+        workbook = new ExcelJS.Workbook();
+        worksheet = workbook.addWorksheet('Relatório Consolidado');
+
+        worksheet.columns = [
+            { header: 'Data da Venda', key: 'data_log_venda', width: 25 },
+            { header: 'Data do agendamento', key: 'data_utilizacao', width: 25 },
+            { header: 'Número do Pedido', key: 'ip_maquina_venda', width: 25 },
+            { header: 'Número de Ingresso', key: 'id_estoque_utilizavel', width: 25 },
+            { header: 'Tipo de Ingresso / Hospedagem', key: 'tipoDeIngresso', width: 25 },
+            { header: 'Tipo do Produto', key: 'nome_tipo_produto', width: 25 },
+            { header: 'Subtipo de Ingresso', key: 'nome_subtipo_produto', width: 25 },
+            { header: 'Valor', key: 'valor_produto', width: 25 },
+            { header: 'Tipo de Pagamento', key: 'tipoPagamento', width: 25 },
+            { header: 'Centro de Custo', key: 'centroCustoStr', width: 25 },
+            { header: 'Nome do Parque', key: 'nomeParque', width: 25 },
+            { header: 'Núcleo do Parque', key: 'nucleoParque', width: 35 },
+            { header: 'Data de Utilização', key: 'data_log_utilizacao', width: 25 }        
+        ];   
+        
+        resolve(workbook)
+
+    })
+
+    
 }
 
 function startPool(){    
@@ -149,7 +161,7 @@ function handleDisconnects() {
 
                 con.connect(function(err) {
                     if(err){
-                        reject('Erro no banco de dados: ' + poolDatabases[i] + ' - ' + err);
+                        reject('Erro no banco de dados: ' + poolDatabases[i].database + ' - ' + err);
                     }
 
                     else {
@@ -175,7 +187,6 @@ function handleDisconnects() {
             
         })
         .catch((error) => {
-            console.log(error)
             reject(error)
         });
 
@@ -183,7 +194,7 @@ function handleDisconnects() {
 }
 
 
-function salvaExcel(req){
+function salvaExcel(req, workbook){
 
     return new Promise(function(resolve, reject){
     
@@ -193,7 +204,7 @@ function salvaExcel(req){
         let filename = diretorioArquivos + 'Relatorio_' + dataInicio + '_' + dataFinal + '.xlsx'
         let path = diretorioArquivosUrl + 'Relatorio_' + dataInicio + '_' + dataFinal + '.xlsx'
 
-        console.log('Escrevendo no arquivo: ' + filename)    
+        log_('Escrevendo no arquivo: ' + filename)            
         
         workbook.xlsx.writeFile(filename)
         .then(() => {
@@ -205,9 +216,7 @@ function salvaExcel(req){
 }
 
 function startInterface(){    
-    log_('Iniciando aplicativo. Preparando databases')       
-
-    startExcel()
+    log_('Iniciando aplicativo. Preparando databases')           
 
     startPool()
 
@@ -224,14 +233,16 @@ function geraRelatorio(req, res){
         
     let promises = []
 
-    salvaRelatorio(req)
+    startExcel()
+    .then((workbook) => {
+        
+        salvaRelatorio(req)
 
     .then((datetime) => {
 
-        log_("Identificação do relatório: " + datetime)
 
-        for(let i = 0; i < poolConnections.length; i++){            
-            let promise = iniciaRelatorio(i, req)
+        for(let i = 0; i < poolConnections.length; i++){                    
+            let promise = iniciaRelatorio(poolConnections[i], req)
             promises.push(promise)
         }    
         
@@ -239,7 +250,7 @@ function geraRelatorio(req, res){
     
             .then(() => {    
     
-                salvaExcel(req)
+                salvaExcel(req, workbook)
                 .then((filename) => {
     
                     finalizaRelatorio(datetime, filename)
@@ -250,10 +261,14 @@ function geraRelatorio(req, res){
                     })
                     
                 })
-                
-        }) 
+                    
+            }) 
 
-    })       
+        })       
+
+    })
+
+    
 }
 
 
@@ -305,25 +320,23 @@ function finalizaRelatorio(datetime, filename){
 }
 
 
-function iniciaRelatorio(index, req){
-
-    return new Promise(function(resolve, reject){     
+function iniciaRelatorio(con, req){
         
-        let con = poolConnections[index]
+    return new Promise(function(resolve, reject){     
 
         getInfoVendas(con, req)
 
         .then((result) => {        
             
-            log_("Total da consulta do banco " + poolDatabaseNames[index] + '. Total: ' + result.length)
+            log_("Total da consulta do banco " + con.config.database + '. Total: ' + result.length)
             
             if(result.length === 0){                                    
-                log_("Resultado vazio para o banco " + poolDatabaseNames[index])
+                log_("Resultado vazio para o banco " + con.config.database)
                 resolve()
             }
             else {                                
 
-                log_("Gerando relatório do banco " + poolDatabaseNames[index])
+                log_("Gerando relatório do banco " + con.config.database)
 
                 popularExcel(result)
 
@@ -401,7 +414,7 @@ async function popularExcel(result){
                 let id_estoque_utilizavel = element.id_estoque_utilizavel                            
                 let nome_tipo_produto = element.nome_tipo_produto
                 let nome_subtipo_produto = element.nome_subtipo_produto
-                let valor_produto = element.valor_produto         
+                let valor_produto = "R$ " + element.valor_produto         
                 let tipoPagamento = element.nome_tipo_pagamento
                 let centroCustoStr = element.centro_de_custo
                 let nomeParque = element.nome_do_parque
