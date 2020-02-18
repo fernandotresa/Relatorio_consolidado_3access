@@ -20,7 +20,7 @@ var worksheet = workbook.addWorksheet('Relatório Consolidado');
 
 var poolDatabases = []
 var poolConnections = []
-var diretorioArquivos = "/tmp/"
+var diretorioArquivos = "/var/www/html/relatorios_arquivos/"
 
 var conPrincipal
 
@@ -148,7 +148,7 @@ function handleDisconnects() {
 
                 con.connect(function(err) {
                     if(err){
-                        reject('Erro no banco de dados: ' + err);
+                        reject('Erro no banco de dados: ' + poolDatabases[i] + ' - ' + err);
                     }
 
                     else {
@@ -182,26 +182,27 @@ function handleDisconnects() {
 }
 
 
-function salvaExcel(){
+function salvaExcel(req){
 
     return new Promise(function(resolve, reject){
+    
+        let dataInicio = moment(req.body.dataInicial).format("DDMMYYYY")
+        let dataFinal = moment(req.body.dataFinal).format("DDMMYYYY")
 
-        let filename = diretorioArquivos + 'Relatorio.xlsx'
+        let filename = diretorioArquivos + 'Relatorio_' + dataInicio + '_' + dataFinal + '.xlsx'
         console.log('Escrevendo no arquivo: ' + filename)    
         
         workbook.xlsx.writeFile(filename)
         .then(() => {
             
-            resolve()
+            resolve(filename)
         })            
         
     })    
 }
 
 function startInterface(){    
-    log_('Iniciando aplicativo. Preparando databases')   
-    
-    iniciaDbPrincipal()
+    log_('Iniciando aplicativo. Preparando databases')       
 
     startExcel()
 
@@ -209,7 +210,9 @@ function startInterface(){
 
     .then(() => {
 
-        log_("Banco de dados iniciados com sucesso. Escutando conexoes...")        
+        log_("Banco de dados iniciados com sucesso. Escutando conexoes...")   
+        
+        iniciaDbPrincipal()
         http.listen(8085);  
     })    
 }
@@ -233,10 +236,10 @@ function geraRelatorio(req, res){
     
             .then(() => {    
     
-                salvaExcel()
-                .then(() => {
+                salvaExcel(req)
+                .then((filename) => {
     
-                    finalizaRelatorio(datetime)
+                    finalizaRelatorio(datetime, filename)
 
                     .then(() => {
 
@@ -274,12 +277,13 @@ function salvaRelatorio(req){
 
 }
 
-function finalizaRelatorio(datetime){
+function finalizaRelatorio(datetime, filename){
 
     return new Promise(function(resolve, reject){         
 
         var sql = "UPDATE consolidados SET \
-                dataFim = '" + moment().format("YYYY-MM-DDThh:mm:ss") + "',\
+                datetimeFim = '" + moment().format("YYYY-MM-DDThh:mm:ss") + "',\
+                filename = '" + filename + "', \
                 status = 'Finalizado' \
             WHERE datetime = '" + datetime + "'"
 
@@ -449,12 +453,30 @@ async function popularExcel(result){
     })    
 }
 
+function pegaRelatorio(req, res){
+    return new Promise(function(resolve, reject){
+
+        let sql = "SELECT * FROM consolidados";
+        log_(sql)
+        
+        conPrincipal.query(sql, function (err, result) {        
+            if (err){
+                reject(err);
+            }
+        
+            resolve(res.json({"success": result}))
+
+        });
+
+    })
+}
+
 app.post('/novoRelatorio', function(req, res) {
     geraRelatorio(req, res)                     
 });
 
 app.post('/pegaRelatorio', function(req, res) {
-    getSessionsTicketTotal(req, res)                 
+    pegaRelatorio(req, res)                 
 });
 
 process.on('SIGINT', function() {
