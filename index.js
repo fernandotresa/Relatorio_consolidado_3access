@@ -255,7 +255,7 @@ function geraRelatorio(req, res){
 
                     .then(() => {
 
-                        res.json({"success": true});     
+                        res.json({"success": filename});     
                     })
                     
                 })
