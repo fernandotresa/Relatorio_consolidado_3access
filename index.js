@@ -17,8 +17,8 @@ app.use(cors());
 
 var poolDatabases = []
 var poolConnections = []
-//var diretorioArquivos = "/var/www/html/relatorios_arquivos/"
-var diretorioArquivos = "/tmp/"
+var diretorioArquivos = "/var/www/html/relatorios_arquivos/"
+//var diretorioArquivos = "/tmp/"
 var diretorioArquivosUrl = "/relatorios_arquivos/"
 
 var conPrincipal
@@ -335,7 +335,7 @@ function iniciaRelatorio(con, req){
                 resolve()
             }
             else {                                
-                
+
                 popularExcel(result)
 
                 .then(() => {
