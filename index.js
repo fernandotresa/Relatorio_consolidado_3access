@@ -23,9 +23,6 @@ var diretorioArquivosUrl = "/relatorios_arquivos/"
 
 var conPrincipal
 
-var workbook
-var worksheet
-
 var poolDatabaseNames = [
         "intervales", 
         "aguapei", 
@@ -72,8 +69,8 @@ function startExcel(){
 
     return new Promise(function(resolve){ 
 
-        workbook = new ExcelJS.Workbook();
-        worksheet = workbook.addWorksheet('Relatório Consolidado');
+        var workbook = new ExcelJS.Workbook();
+        var worksheet = workbook.addWorksheet('Relatório Consolidado');
 
         worksheet.columns = [
             { header: 'Data da Venda', key: 'data_log_venda', width: 25 },
@@ -200,9 +197,10 @@ function salvaExcel(req, workbook){
     
         let dataInicio = moment(req.body.dataInicial).format("DDMMYYYY")
         let dataFinal = moment(req.body.dataFinal).format("DDMMYYYY")
+        let datetimenow = moment().format("DDMMYYYYhhmmss")
 
-        let filename = diretorioArquivos + 'Relatorio_' + dataInicio + '_' + dataFinal + '.xlsx'
-        let path = diretorioArquivosUrl + 'Relatorio_' + dataInicio + '_' + dataFinal + '.xlsx'
+        let filename = diretorioArquivos + 'Relatorio_' + dataInicio + '_' + dataFinal + '_' + datetimenow + '.xlsx'
+        let path = diretorioArquivosUrl + 'Relatorio_' + dataInicio + '_' + dataFinal + '_' + datetimenow + '.xlsx'
 
         log_('Escrevendo no arquivo: ' + filename)            
         
@@ -242,7 +240,7 @@ function geraRelatorio(req, res){
 
 
         for(let i = 0; i < poolConnections.length; i++){                    
-            let promise = iniciaRelatorio(poolConnections[i], req)
+            let promise = iniciaRelatorio(poolConnections[i], req, workbook)
             promises.push(promise)
         }    
         
@@ -320,7 +318,7 @@ function finalizaRelatorio(datetime, filename){
 }
 
 
-function iniciaRelatorio(con, req){
+function iniciaRelatorio(con, req, workbook){
         
     return new Promise(function(resolve, reject){     
 
@@ -336,7 +334,7 @@ function iniciaRelatorio(con, req){
             }
             else {                                
 
-                popularExcel(result)
+                popularExcel(result, workbook)
 
                 .then(() => {
                     resolve()   
@@ -393,7 +391,7 @@ function getInfoVendas(con, req){
     })
 }
 
-async function popularExcel(result){
+async function popularExcel(result, workbook){
 
     return new Promise(function(resolve, reject){    
         
@@ -425,6 +423,8 @@ async function popularExcel(result){
 
              
                 //console.log(id_estoque_utilizavel, tipoDeIngresso, nomeParque, centroCustoStr,  nucleoParque)                            
+
+                var worksheet = workbook.getWorksheet('Relatório Consolidado')
 
                 worksheet.addRow({
                         id: 1, 
