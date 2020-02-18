@@ -416,7 +416,7 @@ async function popularExcel(result, workbook){
                 let nomeParque = element.nome_do_parque
                 let nucleoParque = element.nucleo_do_parque
                 let nome_produto = element.nome_produto
-                let tipoDeIngresso = nome_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
+                let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
 
                 if(data_utilizacao.length === 0 || data_utilizacao === '0000-00-00 00:00:00')
                     data_utilizacao = data_log_venda
