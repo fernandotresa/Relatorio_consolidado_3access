@@ -80,7 +80,7 @@ function startExcel(){
             { header: 'Tipo de Ingresso / Hospedagem', key: 'tipoDeIngresso', width: 25 },
             { header: 'Tipo do Produto', key: 'nome_tipo_produto', width: 25 },
             { header: 'Subtipo de Ingresso', key: 'nome_subtipo_produto', width: 25 },
-            { header: 'Valor', key: 'valor_produto', width: 25 },
+            { header: 'Valor em reais', key: 'valor_produto', width: 25 },
             { header: 'Tipo de Pagamento', key: 'tipoPagamento', width: 25 },
             { header: 'Centro de Custo', key: 'centroCustoStr', width: 25 },
             { header: 'Nome do Parque', key: 'nomeParque', width: 25 },
