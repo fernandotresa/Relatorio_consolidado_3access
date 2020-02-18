@@ -21,6 +21,7 @@ var worksheet = workbook.addWorksheet('Relatório Consolidado');
 var poolDatabases = []
 var poolConnections = []
 var diretorioArquivos = "/var/www/html/relatorios_arquivos/"
+var diretorioArquivosUrl = "/relatorios_arquivos/"
 
 var conPrincipal
 
@@ -190,12 +191,14 @@ function salvaExcel(req){
         let dataFinal = moment(req.body.dataFinal).format("DDMMYYYY")
 
         let filename = diretorioArquivos + 'Relatorio_' + dataInicio + '_' + dataFinal + '.xlsx'
+        let path = diretorioArquivosUrl + 'Relatorio_' + dataInicio + '_' + dataFinal + '.xlsx'
+
         console.log('Escrevendo no arquivo: ' + filename)    
         
         workbook.xlsx.writeFile(filename)
         .then(() => {
             
-            resolve(filename)
+            resolve(path)
         })            
         
     })    
