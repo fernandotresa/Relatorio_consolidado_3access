@@ -18,7 +18,6 @@ app.use(cors());
 var poolDatabases = []
 var poolConnections = []
 var diretorioArquivos = "/var/www/html/relatorios_arquivos/"
-//var diretorioArquivos = "/tmp/"
 var diretorioArquivosUrl = "/relatorios_arquivos/"
 
 var conPrincipal
@@ -48,7 +47,8 @@ function iniciaDbPrincipal(){
         host: "3.212.93.86",                    
         user: "root",
         password: "Mudaragora00",
-        database: "relatorios"
+        database: "relatorios",
+        timezone: 'utc'
     };
     
     conPrincipal = mysql.createConnection(db_config);               
@@ -111,7 +111,8 @@ function startPool(){
                     host: "3.212.93.86",                    
                     user: "root",
                     password: "Mudaragora00",
-                    database: poolDatabaseNames[i]
+                    database: poolDatabaseNames[i],
+                    timezone: 'utc'
                 };
                             
                 resolvePool(poolDatabases.push(db_config))
