@@ -363,8 +363,8 @@ function getInfoVendas(con, req){
 
     return new Promise(function(resolve, reject){
 
-        var dataInicio = moment(req.body.dataInicial).format()
-        var dataFinal = moment(req.body.dataFinal).format()   
+        var dataInicio = req.body.dataInicial
+        var dataFinal = req.body.dataFinal   
 
         let sql = "SELECT * \
                 FROM 3a_log_vendas \
@@ -377,7 +377,7 @@ function getInfoVendas(con, req){
                 WHERE 3a_log_vendas.data_log_venda BETWEEN '" + dataInicio + "' AND  '" + dataFinal + "';"
 
 
-        //log_(sql)
+        log_(sql)
 
         con.query(sql, function (err, result) {        
             if (err){
