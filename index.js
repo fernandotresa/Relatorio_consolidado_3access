@@ -377,7 +377,7 @@ function getInfoVendas(con, req){
                 WHERE 3a_log_vendas.data_log_venda BETWEEN '" + dataInicio + "' AND  '" + dataFinal + "';"
 
 
-        log_(sql)
+        //log_(sql)
 
         con.query(sql, function (err, result) {        
             if (err){
@@ -415,14 +415,13 @@ async function popularExcel(result, workbook){
                 let centroCustoStr = element.centro_de_custo
                 let nomeParque = element.nome_do_parque
                 let nucleoParque = element.nucleo_do_parque
-                let nome_produto = element.nome_produto
                 let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
 
                 if(data_utilizacao.length === 0 || data_utilizacao === '0000-00-00 00:00:00')
                     data_utilizacao = data_log_venda
 
              
-                //console.log(id_estoque_utilizavel, tipoDeIngresso, nomeParque, centroCustoStr,  nucleoParque)                            
+                console.log(id_estoque_utilizavel, nomeParque, data_log_venda)                            
 
                 var worksheet = workbook.getWorksheet('Relatório Consolidado')
 
