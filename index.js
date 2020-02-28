@@ -426,8 +426,7 @@ async function popularExcel(result, workbook){
 
                 console.log("1", element.id_estoque_utilizavel, element.data_utilizacao, moment(element.data_utilizacao).format("hh:mm:ss"), serial_gtw)
 
-
-                if(!serial_gtw.length || serial_gtw.length === 0)
+                if(!serial_gtw || serial_gtw.length === 0)
                     serial_gtw = ""
 
                 if(data_utilizacao.length === 0 || data_utilizacao === '0000-00-00 00:00:00')
