@@ -261,6 +261,9 @@ function geraRelatorio(req, res){
     
             .then(() => {    
     
+
+                worksheet.getColumn(9).numFmt = '"£"#,##0.00;[Red]\-"£"#,##0.00';
+                
                 salvaExcel(req, workbook)
                 .then((filename) => {
     
@@ -427,7 +430,6 @@ async function popularExcel(result, worksheet){
                 let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"               
                 let serial_gtw = element.serial_gtw 
 
-
                 let data_utilizacao = moment(element.data_log_venda).format("DD/MM/YYYY hh:mm:ss") 
                 let data_log_venda = moment(element.data_log_venda).format("DD/MM/YYYY") 
                 let hora_log_venda = moment(element.data_log_venda).format("hh:mm:ss")
@@ -464,10 +466,8 @@ async function popularExcel(result, worksheet){
                     numero_serie: serial_gtw
                 }
 
-                worksheet.addRow(data)
-                    
-                        
-                 resolveExcel()
+                worksheet.addRow(data)                                                            
+                resolveExcel()
             })
             
 
