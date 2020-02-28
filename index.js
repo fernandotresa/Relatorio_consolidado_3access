@@ -462,7 +462,6 @@ async function popularExcel(result, workbook){
                     numero_serie: "serial_gtw"
                 }
 
-                console.log(data)
                 worksheet.addRow(data)
                     
                         
