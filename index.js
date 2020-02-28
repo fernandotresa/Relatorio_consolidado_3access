@@ -415,8 +415,8 @@ async function popularExcel(result, worksheet){
             let promise = new Promise(function(resolveExcel){ 
 
                 let element = result[i]                
-                let data_log_venda = moment(element.data_log_venda).format("DD/MM/YYYY")
-                let hora_log_venda = moment(element.data_log_venda).format("hh:mm:ss")
+                let data_log_venda = element.data_log_venda
+                let hora_log_venda = element.data_log_venda
                 let ip_maquina_venda = element.ip_maquina_venda                
                 let id_estoque_utilizavel = element.id_estoque_utilizavel                            
                 let nome_tipo_produto = element.nome_tipo_produto
@@ -433,8 +433,8 @@ async function popularExcel(result, worksheet){
                 if(! serial_gtw || serial_gtw.length === 0)
                     serial_gtw = ""
 
-                let data_utilizacao = moment(element.data_log_utilizacao).format("DD/MM/YYYY")
-                let hora_log_utilizacao = moment(element.data_log_utilizacao).format("hh:mm:ss")
+                let data_utilizacao = element.data_log_venda
+                let hora_log_utilizacao = element.data_log_venda
 
                 if(element.data_log_utilizacao.length === 0 || element.data_log_utilizacao === '0000-00-00 00:00:00'){
                     data_utilizacao = data_log_venda
@@ -463,7 +463,6 @@ async function popularExcel(result, worksheet){
                     numero_serie: "serial_gtw"
                 }
 
-                console.log('Adicionando ROW')
                 worksheet.addRow(data)
                     
                         
@@ -475,7 +474,7 @@ async function popularExcel(result, worksheet){
         }
 
 
-     return Promise.all(promises)
+     return resolve(Promise.all(promises))
         
     })    
 }
