@@ -387,7 +387,7 @@ function getInfoVendas(con, req){
                 WHERE 3a_log_vendas.data_log_venda BETWEEN '" + dataInicio + "' AND  '" + dataFinal + "';"
 
 
-        log_(sql)
+       // log_(sql)
 
         con.query(sql, function (err, result) {        
             if (err){
@@ -407,8 +407,6 @@ async function popularExcel(result, workbook){
         
         let promises = []
         var worksheet = workbook.getWorksheet('Relatório Consolidado')
-
-        console.log(worksheet)
 
         for(var i = 0; i < result.length; i++){  
             
@@ -446,8 +444,8 @@ async function popularExcel(result, workbook){
 
                 let data = {
                     id: i, 
-                    data_log_venda: data_log_venda, 
-                    hora_log_venda: hora_log_venda, 
+                    data_log_venda: element.data_log_utilizacao, 
+                    hora_log_venda: element.data_log_utilizacao, 
                     data_utilizacao: data_utilizacao, 
                     ip_maquina_venda: ip_maquina_venda, 
                     id_estoque_utilizavel: id_estoque_utilizavel, 
@@ -459,8 +457,8 @@ async function popularExcel(result, workbook){
                     centroCustoStr: centroCustoStr, 
                     nomeParque: nomeParque, 
                     nucleoParque: nucleoParque, 
-                    data_log_utilizacao: data_log_utilizacao,
-                    hora_log_utilizacao: hora_log_utilizacao,
+                    data_log_utilizacao: element.data_log_utilizacao,
+                    hora_log_utilizacao: element.data_log_utilizacao,
                     numero_serie: "serial_gtw"
                 }
 
