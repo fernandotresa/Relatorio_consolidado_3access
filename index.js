@@ -434,7 +434,7 @@ async function popularExcel(result, workbook){
 
                 }
 
-                console.log("2", id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao, serial_gtw)                    
+                console.log(id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao, serial_gtw)                    
 
                 worksheet.addRow({
                         id: 1, 
@@ -454,7 +454,9 @@ async function popularExcel(result, workbook){
                         data_log_utilizacao: data_log_utilizacao,
                         hora_log_utilizacao: hora_log_utilizacao,
                         numero_serie: serial_gtw
-                    })
+                    }).catch((error => {
+                        console.log(error)
+                    }))
                     
                         
                  resolveExcel()
