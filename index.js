@@ -410,9 +410,6 @@ async function popularExcel(result, workbook){
                 let data_log_venda = moment(element.data_log_venda).format("DD/MM/YYYY")
                 let hora_log_venda = moment(element.data_log_venda).format("hh:mm:ss")
 
-                let data_utilizacao = moment(element.data_utilizacao).format("DD/MM/YYYY")
-                let hora_log_utilizacao = moment(element.data_utilizacao).format("hh:mm:ss")
-
                 let ip_maquina_venda = element.ip_maquina_venda                
                 let id_estoque_utilizavel = element.id_estoque_utilizavel                            
                 let nome_tipo_produto = element.nome_tipo_produto
@@ -428,7 +425,9 @@ async function popularExcel(result, workbook){
                 if(data_utilizacao.length === 0 || data_utilizacao === '0000-00-00 00:00:00')
                     data_utilizacao = data_log_venda
 
-             
+                let data_utilizacao = moment(element.data_utilizacao).format("DD/MM/YYYY")
+                let hora_log_utilizacao = moment(element.data_utilizacao).format("hh:mm:ss")
+    
                 console.log(id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao)                            
 
                 var worksheet = workbook.getWorksheet('Relatório Consolidado')
