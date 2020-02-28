@@ -422,15 +422,16 @@ async function popularExcel(result, workbook){
                 let serial_gtw = element.serial_gtw
                 let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
 
+                console.log("1", id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao)                            
+
                 if(data_utilizacao.length === 0 || data_utilizacao === '0000-00-00 00:00:00')
                     data_utilizacao = data_log_venda
 
                 let data_utilizacao = moment(element.data_utilizacao).format("DD/MM/YYYY")
                 let hora_log_utilizacao = moment(element.data_utilizacao).format("hh:mm:ss")
-
-                
     
-                console.log(id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao)                            
+                console.log("2", id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao)                            
+                
 
                 var worksheet = workbook.getWorksheet('Relatório Consolidado')
 
