@@ -425,7 +425,7 @@ async function popularExcel(result, workbook){
                 let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
 
                 if(!serial_gtw.length || serial_gtw.length === 0)
-                    serial_gtw = ""
+                    serial_gtw = "NÃO DEFINIDO"
 
                 if(data_utilizacao.length === 0 || data_utilizacao === '0000-00-00 00:00:00')
                     data_utilizacao = data_log_venda
