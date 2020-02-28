@@ -427,6 +427,8 @@ async function popularExcel(result, workbook){
 
                 let data_utilizacao = moment(element.data_utilizacao).format("DD/MM/YYYY")
                 let hora_log_utilizacao = moment(element.data_utilizacao).format("hh:mm:ss")
+
+                
     
                 console.log(id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao)                            
 
