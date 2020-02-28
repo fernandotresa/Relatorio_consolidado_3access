@@ -88,7 +88,7 @@ function startExcel(){
             { header: 'Núcleo do Parque', key: 'nucleoParque', width: 35 },
             { header: 'Data de Utilização', key: 'data_log_utilizacao', width: 25 },
             { header: 'Hora da Utilização', key: 'hora_log_utilizacao', width: 25 },
-            { header: 'Número de série Maq. Cartão', key: 'numero_serie', width: 25 }
+            { header: 'Número de série', key: 'numero_serie', width: 25 }
         ];   
         
         resolve(workbook)
@@ -402,7 +402,6 @@ async function popularExcel(result, workbook){
         let promises = []
         var worksheet = workbook.getWorksheet('Relatório Consolidado')
 
-
         for(var i = 0; i < result.length; i++){  
             
             let promise = new Promise(function(resolveExcel){ 
@@ -420,19 +419,16 @@ async function popularExcel(result, workbook){
                 let centroCustoStr = element.centro_de_custo
                 let nomeParque = element.nome_do_parque
                 let nucleoParque = element.nucleo_do_parque
-                let serial_gtw = "element.serial_gtw"
+                let serial_gtw = element.serial_gtw
                 let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
 
-                console.log("1", element.id_estoque_utilizavel, element.data_utilizacao, moment(element.data_utilizacao).format("hh:mm:ss"), serial_gtw)
-                
                 if(data_utilizacao.length === 0 || data_utilizacao === '0000-00-00 00:00:00')
                     data_utilizacao = data_log_venda
 
-                console.log("2", element.id_estoque_utilizavel, element.data_utilizacao, moment(element.data_utilizacao).format("hh:mm:ss"), serial_gtw)
-
-
                 let data_utilizacao = moment(element.data_utilizacao).format("DD/MM/YYYY")
                 let hora_log_utilizacao = moment(element.data_utilizacao).format("hh:mm:ss")
+
+                console.log("2", id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao, serial_gtw)
                     
 
                 worksheet.addRow({
