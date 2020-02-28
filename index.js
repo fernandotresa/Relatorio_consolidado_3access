@@ -345,6 +345,8 @@ function iniciaRelatorio(con, req, worksheet){
             }
             else {                                
 
+                log_("Populando excel de " + con.config.database + '. Total: ' + result.length)
+
                 popularExcel(result, worksheet)
 
                 .then(() => {
@@ -440,7 +442,6 @@ async function popularExcel(result, worksheet){
 
                 }
 
-                console.log(id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao, serial_gtw)                    
 
                 let data = {
                     id: i, 
@@ -462,6 +463,7 @@ async function popularExcel(result, worksheet){
                     numero_serie: "serial_gtw"
                 }
 
+                console.log('Adicionando ROW')
                 worksheet.addRow(data)
                     
                         
@@ -473,16 +475,7 @@ async function popularExcel(result, worksheet){
         }
 
 
-     Promise.all(promises)
-        .then(() => {    
-            resolve()                    
-
-
-            
-        })
-        .catch(() => {            
-            resolve()
-        })
+     return Promise.all(promises)
         
     })    
 }
