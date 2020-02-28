@@ -400,6 +400,8 @@ async function popularExcel(result, workbook){
     return new Promise(function(resolve, reject){    
         
         let promises = []
+        var worksheet = workbook.getWorksheet('Relatório Consolidado')
+
 
         for(var i = 0; i < result.length; i++){  
             
@@ -407,11 +409,11 @@ async function popularExcel(result, workbook){
 
                 let element = result[i]
                 
-                console.log("1", element.id_estoque_utilizavel)                            
-
 
                 let data_log_venda = moment(element.data_log_venda).format("DD/MM/YYYY")
                 let hora_log_venda = moment(element.data_log_venda).format("hh:mm:ss")
+
+                console.log("1", element.id_estoque_utilizavel, data_log_venda, hora_log_venda)
 
                 let ip_maquina_venda = element.ip_maquina_venda                
                 let id_estoque_utilizavel = element.id_estoque_utilizavel                            
@@ -431,11 +433,8 @@ async function popularExcel(result, workbook){
 
                 let data_utilizacao = moment(element.data_utilizacao).format("DD/MM/YYYY")
                 let hora_log_utilizacao = moment(element.data_utilizacao).format("hh:mm:ss")
-    
-                console.log("2", id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao)                            
-                
+                    
 
-                var worksheet = workbook.getWorksheet('Relatório Consolidado')
 
                 worksheet.addRow({
                         id: 1, 
