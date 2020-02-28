@@ -444,28 +444,28 @@ async function popularExcel(result, workbook){
 
                 console.log(id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao, serial_gtw)                    
 
-                worksheet.addRow({
-                        id: i, 
-                        data_log_venda: data_log_venda, 
-                        hora_log_venda: hora_log_venda, 
-                        data_utilizacao: data_utilizacao, 
-                        ip_maquina_venda: ip_maquina_venda, 
-                        id_estoque_utilizavel: id_estoque_utilizavel, 
-                        tipoDeIngresso: tipoDeIngresso, 
-                        nome_tipo_produto: nome_tipo_produto, 
-                        nome_subtipo_produto: nome_subtipo_produto, 
-                        valor_produto: valor_produto, 
-                        tipoPagamento: tipoPagamento, 
-                        centroCustoStr: centroCustoStr, 
-                        nomeParque: nomeParque, 
-                        nucleoParque: nucleoParque, 
-                        data_log_utilizacao: data_log_utilizacao,
-                        hora_log_utilizacao: hora_log_utilizacao,
-                        numero_serie: "serial_gtw"
+                let data = {
+                    id: i, 
+                    data_log_venda: data_log_venda, 
+                    hora_log_venda: hora_log_venda, 
+                    data_utilizacao: data_utilizacao, 
+                    ip_maquina_venda: ip_maquina_venda, 
+                    id_estoque_utilizavel: id_estoque_utilizavel, 
+                    tipoDeIngresso: tipoDeIngresso, 
+                    nome_tipo_produto: nome_tipo_produto, 
+                    nome_subtipo_produto: nome_subtipo_produto, 
+                    valor_produto: valor_produto, 
+                    tipoPagamento: tipoPagamento, 
+                    centroCustoStr: centroCustoStr, 
+                    nomeParque: nomeParque, 
+                    nucleoParque: nucleoParque, 
+                    data_log_utilizacao: data_log_utilizacao,
+                    hora_log_utilizacao: hora_log_utilizacao,
+                    numero_serie: "serial_gtw"
+                }
 
-
-
-                    })
+                console.log(data)
+                worksheet.addRow(data)
                     
                         
                  resolveExcel()
