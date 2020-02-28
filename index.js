@@ -402,6 +402,8 @@ async function popularExcel(result, workbook){
         let promises = []
         var worksheet = workbook.getWorksheet('Relatório Consolidado')
 
+        console.log(worksheet)
+
         for(var i = 0; i < result.length; i++){  
             
             let promise = new Promise(function(resolveExcel){ 
@@ -437,7 +439,7 @@ async function popularExcel(result, workbook){
                 console.log(id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao, serial_gtw)                    
 
                 worksheet.addRow({
-                        id: 1, 
+                        id: i, 
                         data_log_venda: data_log_venda, 
                         hora_log_venda: hora_log_venda, 
                         data_utilizacao: data_utilizacao, 
