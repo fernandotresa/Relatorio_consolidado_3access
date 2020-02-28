@@ -407,6 +407,9 @@ async function popularExcel(result, workbook){
             let promise = new Promise(function(resolveExcel){ 
 
                 let element = result[i]
+
+                console.log("1", element.id_estoque_utilizavel, element.data_log_venda, element.data_log_utilizacao, element.serial_gtw)
+
                 
                 let data_log_venda = moment(element.data_log_venda).format("DD/MM/YYYY")
                 let hora_log_venda = moment(element.data_log_venda).format("hh:mm:ss")
@@ -414,15 +417,13 @@ async function popularExcel(result, workbook){
                 let id_estoque_utilizavel = element.id_estoque_utilizavel                            
                 let nome_tipo_produto = element.nome_tipo_produto
                 let nome_subtipo_produto = element.nome_subtipo_produto
-                let valor_produto = Number(element.valor_produto)
+                let valor_produto = element.valor_produto
                 let tipoPagamento = element.nome_tipo_pagamento
                 let centroCustoStr = element.centro_de_custo
                 let nomeParque = element.nome_do_parque
                 let nucleoParque = element.nucleo_do_parque
                 let data_utilizacao = moment(element.data_log_utilizacao).format("DD/MM/YYYY")
                 let hora_log_utilizacao = moment(element.data_log_utilizacao).format("hh:mm:ss")
-
-                console.log("1", id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao, serial_gtw)
 
                 let serial_gtw = element.serial_gtw
                 let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
