@@ -418,22 +418,23 @@ async function popularExcel(result, workbook){
                 let centroCustoStr = element.centro_de_custo
                 let nomeParque = element.nome_do_parque
                 let nucleoParque = element.nucleo_do_parque
-                let data_utilizacao = moment(element.data_log_utilizacao).format("DD/MM/YYYY")
-                let hora_log_utilizacao = moment(element.data_log_utilizacao).format("hh:mm:ss")
-
+                let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
+               
                 let serial_gtw = element.serial_gtw 
 
                 if(! serial_gtw || serial_gtw.length === 0)
                     serial_gtw = ""
 
-                console.log("1", element.id_estoque_utilizavel, element.data_log_venda, element.data_log_utilizacao, serial_gtw)
+                let data_utilizacao = moment(element.data_log_utilizacao).format("DD/MM/YYYY")
+                let hora_log_utilizacao = moment(element.data_log_utilizacao).format("hh:mm:ss")
 
-
-                let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
-
-                if(data_utilizacao.length === 0 || data_utilizacao === '0000-00-00 00:00:00')
+                if(element.data_log_utilizacao.length === 0 || element.data_log_utilizacao === '0000-00-00 00:00:00'){
                     data_utilizacao = data_log_venda
+                    hora_log_utilizacao = hora_log_venda
 
+                }
+
+    
                 console.log("2", id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao, serial_gtw)
                     
 
