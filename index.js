@@ -407,6 +407,9 @@ async function popularExcel(result, workbook){
 
                 let element = result[i]
                 
+                console.log("1", element.id_estoque_utilizavel)                            
+
+
                 let data_log_venda = moment(element.data_log_venda).format("DD/MM/YYYY")
                 let hora_log_venda = moment(element.data_log_venda).format("hh:mm:ss")
 
@@ -422,7 +425,6 @@ async function popularExcel(result, workbook){
                 let serial_gtw = element.serial_gtw
                 let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
 
-                console.log("1", id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao)                            
 
                 if(data_utilizacao.length === 0 || data_utilizacao === '0000-00-00 00:00:00')
                     data_utilizacao = data_log_venda
