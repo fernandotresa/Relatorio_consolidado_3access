@@ -429,7 +429,7 @@ async function popularExcel(result, workbook){
                     data_utilizacao = data_log_venda
 
              
-                console.log(id_estoque_utilizavel, nomeParque, data_log_venda)                            
+                console.log(id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao)                            
 
                 var worksheet = workbook.getWorksheet('Relatório Consolidado')
 
