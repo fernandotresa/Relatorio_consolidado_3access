@@ -434,7 +434,7 @@ async function popularExcel(result, worksheet){
                 if(! serial_gtw || serial_gtw.length === 0)
                     serial_gtw = ""
 
-                if(element.data_log_utilizacao.length === 0 || element.data_log_utilizacao === '0000-00-00 00:00:00'){
+                if(data_log_utilizacao.length === 0 || data_log_utilizacao === '0000-00-00 00:00:00'){
                     data_utilizacao = data_log_venda
                     hora_log_utilizacao = hora_log_venda
                 }
