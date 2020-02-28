@@ -425,17 +425,29 @@ async function popularExcel(result, worksheet){
                 let centroCustoStr = element.centro_de_custo
                 let nomeParque = element.nome_do_parque
                 let nucleoParque = element.nucleo_do_parque
-                let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
-               
+                let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"               
                 let serial_gtw = element.serial_gtw 
+
+                let data_log_venda = moment(element.data_log_venda).format("DD/MM/YYYY") 
+                let hora_log_venda = moment(element.data_log_venda).format("hh:mm:ss")
+                let data_log_utilizacao = moment(element.data_log_utilizacao).format("DD/MM/YYYY")
+                let hora_log_utilizacao = moment(element.data_log_utilizacao).format("hh:mm:ss")
 
                 if(! serial_gtw || serial_gtw.length === 0)
                     serial_gtw = ""
 
+                if(element.data_log_utilizacao.length === 0 || element.data_log_utilizacao === '0000-00-00 00:00:00'){
+                    data_utilizacao = data_log_venda
+                    hora_log_utilizacao = hora_log_venda
+                }
+
+                console.log(id_estoque_utilizavel, data_log_venda, hora_log_venda, data_log_utilizacao, hora_log_utilizacao)
+    
+
                 let data = {
                     id: i, 
-                    data_log_venda: moment(element.data_log_utilizacao).format(), 
-                    hora_log_venda: moment(element.data_log_utilizacao).format(), 
+                    data_log_venda: data_log_venda, 
+                    hora_log_venda: hora_log_venda, 
                     ip_maquina_venda: ip_maquina_venda, 
                     id_estoque_utilizavel: id_estoque_utilizavel, 
                     tipoDeIngresso: tipoDeIngresso, 
@@ -446,8 +458,8 @@ async function popularExcel(result, worksheet){
                     centroCustoStr: centroCustoStr, 
                     nomeParque: nomeParque, 
                     nucleoParque: nucleoParque, 
-                    data_log_utilizacao: moment(element.data_log_utilizacao).format(),
-                    hora_log_utilizacao: moment(element.data_log_utilizacao).format(),
+                    data_log_utilizacao: data_log_utilizacao,
+                    hora_log_utilizacao: hora_log_utilizacao,
                     numero_serie: "serial_gtw"
                 }
 
