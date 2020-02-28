@@ -409,7 +409,6 @@ async function popularExcel(result, workbook){
 
                 let element = result[i]
                 
-
                 let data_log_venda = moment(element.data_log_venda).format("DD/MM/YYYY")
                 let hora_log_venda = moment(element.data_log_venda).format("hh:mm:ss")
                 let ip_maquina_venda = element.ip_maquina_venda                
@@ -421,7 +420,7 @@ async function popularExcel(result, workbook){
                 let centroCustoStr = element.centro_de_custo
                 let nomeParque = element.nome_do_parque
                 let nucleoParque = element.nucleo_do_parque
-                let serial_gtw = element.serial_gtw
+                let serial_gtw = "element.serial_gtw"
                 let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
 
                 console.log("1", element.id_estoque_utilizavel, element.data_utilizacao, moment(element.data_utilizacao).format("hh:mm:ss"), serial_gtw)
