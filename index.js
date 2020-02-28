@@ -242,9 +242,10 @@ function geraRelatorio(req, res){
 
     .then((datetime) => {
 
+        var worksheet = workbook.getWorksheet('Relatório Consolidado')
 
         for(let i = 0; i < poolConnections.length; i++){                    
-            let promise = iniciaRelatorio(poolConnections[i], req, workbook)
+            let promise = iniciaRelatorio(poolConnections[i], req, worksheet)
             promises.push(promise)
         }    
         
@@ -328,7 +329,7 @@ function finalizaRelatorio(datetime, filename){
 }
 
 
-function iniciaRelatorio(con, req, workbook){
+function iniciaRelatorio(con, req, worksheet){
         
     return new Promise(function(resolve, reject){     
 
@@ -344,7 +345,7 @@ function iniciaRelatorio(con, req, workbook){
             }
             else {                                
 
-                popularExcel(result, workbook)
+                popularExcel(result, worksheet)
 
                 .then(() => {
                     resolve()   
@@ -401,12 +402,11 @@ function getInfoVendas(con, req){
     })
 }
 
-async function popularExcel(result, workbook){
+async function popularExcel(result, worksheet){
 
     return new Promise(function(resolve, reject){    
         
         let promises = []
-        var worksheet = workbook.getWorksheet('Relatório Consolidado')
 
         for(var i = 0; i < result.length; i++){  
             
