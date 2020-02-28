@@ -345,8 +345,6 @@ function iniciaRelatorio(con, req, worksheet){
             }
             else {                                
 
-                log_("Populando excel de " + con.config.database + '. Total: ' + result.length)
-
                 popularExcel(result, worksheet)
 
                 .then(() => {
@@ -406,7 +404,7 @@ function getInfoVendas(con, req){
 
 async function popularExcel(result, worksheet){
 
-    return new Promise(function(resolve, reject){    
+    return new Promise(function(resolve){    
         
         let promises = []
 
@@ -443,7 +441,6 @@ async function popularExcel(result, worksheet){
 
                 console.log(id_estoque_utilizavel, data_log_venda, hora_log_venda, data_log_utilizacao, hora_log_utilizacao)
     
-
                 let data = {
                     id: i, 
                     data_log_venda: data_log_venda, 
