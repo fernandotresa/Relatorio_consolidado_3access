@@ -452,8 +452,7 @@ async function popularExcel(result, workbook){
                         nomeParque: nomeParque, 
                         nucleoParque: nucleoParque, 
                         data_log_utilizacao: data_log_utilizacao,
-                        hora_log_utilizacao: hora_log_utilizacao,
-                        numero_serie: serial_gtw
+                        hora_log_utilizacao: hora_log_utilizacao
 
 
 
