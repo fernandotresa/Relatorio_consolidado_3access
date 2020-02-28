@@ -450,9 +450,7 @@ async function popularExcel(result, workbook){
                         tipoPagamento: tipoPagamento, 
                         centroCustoStr: centroCustoStr, 
                         nomeParque: nomeParque, 
-                        nucleoParque: nucleoParque, 
-                        data_log_utilizacao: data_log_utilizacao,
-                        hora_log_utilizacao: hora_log_utilizacao
+                        nucleoParque: nucleoParque
 
 
 
