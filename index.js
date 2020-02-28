@@ -452,7 +452,7 @@ async function popularExcel(result, worksheet){
                     nucleoParque: nucleoParque, 
                     data_log_utilizacao: data_log_utilizacao,
                     hora_log_utilizacao: hora_log_utilizacao,
-                    numero_serie: "serial_gtw"
+                    numero_serie: serial_gtw
                 }
 
                 worksheet.addRow(data)
