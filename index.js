@@ -434,9 +434,7 @@ async function popularExcel(result, workbook){
 
                 }
 
-    
-                console.log("2", id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao, serial_gtw)
-                    
+                console.log("2", id_estoque_utilizavel, data_log_venda, hora_log_venda, data_utilizacao, hora_log_utilizacao, serial_gtw)                    
 
                 worksheet.addRow({
                         id: 1, 
