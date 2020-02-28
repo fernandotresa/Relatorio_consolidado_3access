@@ -74,6 +74,7 @@ function startExcel(){
 
         worksheet.columns = [
             { header: 'Data da Venda', key: 'data_log_venda', width: 25 },
+            { header: 'Hora da Venda', key: 'hora_log_venda', width: 25 },
             { header: 'Data do agendamento', key: 'data_utilizacao', width: 25 },
             { header: 'Número do Pedido', key: 'ip_maquina_venda', width: 25 },
             { header: 'Número de Ingresso', key: 'id_estoque_utilizavel', width: 25 },
@@ -85,7 +86,9 @@ function startExcel(){
             { header: 'Centro de Custo', key: 'centroCustoStr', width: 25 },
             { header: 'Nome do Parque', key: 'nomeParque', width: 25 },
             { header: 'Núcleo do Parque', key: 'nucleoParque', width: 35 },
-            { header: 'Data de Utilização', key: 'data_log_utilizacao', width: 25 }        
+            { header: 'Data de Utilização', key: 'data_log_utilizacao', width: 25 },
+            { header: 'Hora da Utilização', key: 'hora_log_utilizacao', width: 25 },
+            { header: 'Número de série Maq. Cartão', key: 'numero_serie', width: 25 }
         ];   
         
         resolve(workbook)
@@ -404,18 +407,22 @@ async function popularExcel(result, workbook){
 
                 let element = result[i]
                 
-                let data_log_venda = element.data_log_venda
-                let data_utilizacao = element.data_utilizacao
-                let data_log_utilizacao = element.data_log_utilizacao
+                let data_log_venda = moment(element.data_log_venda).format("DD/MM/YYYY")
+                let hora_log_venda = moment(element.data_log_venda).format("hh:mm:ss")
+
+                let data_utilizacao = moment(element.data_utilizacao).format("DD/MM/YYYY")
+                let hora_log_utilizacao = moment(element.data_utilizacao).format("hh:mm:ss")
+
                 let ip_maquina_venda = element.ip_maquina_venda                
                 let id_estoque_utilizavel = element.id_estoque_utilizavel                            
                 let nome_tipo_produto = element.nome_tipo_produto
                 let nome_subtipo_produto = element.nome_subtipo_produto
-                let valor_produto = element.valor_produto         
+                let valor_produto = Number(element.valor_produto)
                 let tipoPagamento = element.nome_tipo_pagamento
                 let centroCustoStr = element.centro_de_custo
                 let nomeParque = element.nome_do_parque
                 let nucleoParque = element.nucleo_do_parque
+                let serial_gtw = element.serial_gtw
                 let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"
 
                 if(data_utilizacao.length === 0 || data_utilizacao === '0000-00-00 00:00:00')
@@ -429,6 +436,7 @@ async function popularExcel(result, workbook){
                 worksheet.addRow({
                         id: 1, 
                         data_log_venda: data_log_venda, 
+                        hora_log_venda: hora_log_venda, 
                         data_utilizacao: data_utilizacao, 
                         ip_maquina_venda: ip_maquina_venda, 
                         id_estoque_utilizavel: id_estoque_utilizavel, 
@@ -440,8 +448,9 @@ async function popularExcel(result, workbook){
                         centroCustoStr: centroCustoStr, 
                         nomeParque: nomeParque, 
                         nucleoParque: nucleoParque, 
-                        data_log_utilizacao: data_log_utilizacao
-
+                        data_log_utilizacao: data_log_utilizacao,
+                        hora_log_utilizacao: hora_log_utilizacao,
+                        numero_serie: serial_gtw
                     })
                     
                         
