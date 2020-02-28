@@ -415,8 +415,7 @@ async function popularExcel(result, worksheet){
             let promise = new Promise(function(resolveExcel){ 
 
                 let element = result[i]                
-                let data_log_venda = element.data_log_venda
-                let hora_log_venda = element.data_log_venda
+    
                 let ip_maquina_venda = element.ip_maquina_venda                
                 let id_estoque_utilizavel = element.id_estoque_utilizavel                            
                 let nome_tipo_produto = element.nome_tipo_produto
@@ -433,14 +432,10 @@ async function popularExcel(result, worksheet){
                 if(! serial_gtw || serial_gtw.length === 0)
                     serial_gtw = ""
 
-                let data_utilizacao = element.data_log_venda
-                let hora_log_utilizacao = element.data_log_venda
-
                 let data = {
                     id: i, 
-                    data_log_venda: element.data_log_utilizacao, 
-                    hora_log_venda: element.data_log_utilizacao, 
-                    data_utilizacao: data_utilizacao, 
+                    data_log_venda: moment(element.data_log_utilizacao).format(), 
+                    hora_log_venda: moment(element.data_log_utilizacao).format(), 
                     ip_maquina_venda: ip_maquina_venda, 
                     id_estoque_utilizavel: id_estoque_utilizavel, 
                     tipoDeIngresso: tipoDeIngresso, 
@@ -451,8 +446,8 @@ async function popularExcel(result, worksheet){
                     centroCustoStr: centroCustoStr, 
                     nomeParque: nomeParque, 
                     nucleoParque: nucleoParque, 
-                    data_log_utilizacao: element.data_log_utilizacao,
-                    hora_log_utilizacao: element.data_log_utilizacao,
+                    data_log_utilizacao: moment(element.data_log_utilizacao).format(),
+                    hora_log_utilizacao: moment(element.data_log_utilizacao).format(),
                     numero_serie: "serial_gtw"
                 }
 
