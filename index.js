@@ -258,14 +258,7 @@ function geraRelatorio(req, res){
     
                     finalizaRelatorio(datetime, filename)
 
-                    .then(() => {
-
-                        var worksheet = workbook.getWorksheet('Relatório Consolidado')
-                        
-                        worksheet.eachRow(function(row, rowNumber) {
-                            console.log('Row ' + rowNumber + ' = ' + JSON.stringify(row.values));
-                          });
-                           
+                    .then(() => {                           
                         res.json({"success": filename});     
                     })
                     
