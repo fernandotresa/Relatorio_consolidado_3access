@@ -381,7 +381,7 @@ function getInfoVendas(con, req){
                 WHERE 3a_log_vendas.data_log_venda BETWEEN '" + dataInicio + "' AND  '" + dataFinal + "';"
 
 
-        //log_(sql)
+        log_(sql)
 
         con.query(sql, function (err, result) {        
             if (err){
@@ -454,7 +454,11 @@ async function popularExcel(result, workbook){
                         data_log_utilizacao: data_log_utilizacao,
                         hora_log_utilizacao: hora_log_utilizacao,
                         numero_serie: serial_gtw
+
+
+
                     }).catch((error => {
+                        console.log("ERRO ")
                         console.log(error)
                     }))
                     
