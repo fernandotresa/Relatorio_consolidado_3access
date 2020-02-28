@@ -413,7 +413,7 @@ async function popularExcel(result, workbook){
                 let data_log_venda = moment(element.data_log_venda).format("DD/MM/YYYY")
                 let hora_log_venda = moment(element.data_log_venda).format("hh:mm:ss")
 
-                console.log("1", element.id_estoque_utilizavel, data_log_venda, hora_log_venda)
+                console.log("1", element.id_estoque_utilizavel, element.serial_gtw)
 
                 let ip_maquina_venda = element.ip_maquina_venda                
                 let id_estoque_utilizavel = element.id_estoque_utilizavel                            
