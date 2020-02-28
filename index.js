@@ -56,6 +56,10 @@ function iniciaDbPrincipal(){
     conPrincipal.connect(function(err) {
         if(err){
             log_('Erro no banco de dados de relatórios: ' + err);
+
+            setTimeout(() => {
+                iniciaDbPrincipal()
+            }, 3000)
         }
     
         else {
@@ -163,6 +167,10 @@ function handleDisconnects() {
                 con.connect(function(err) {
                     if(err){
                         reject('Erro no banco de dados: ' + poolDatabases[i].database + ' - ' + err);
+
+                        setTimeout(() => {
+                            handleDisconnects()
+                        }, 3000)
                     }
 
                     else {
@@ -419,7 +427,7 @@ async function popularExcel(result, worksheet){
                 let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"               
                 let serial_gtw = element.serial_gtw 
 
-                
+
                 let data_utilizacao = moment(element.data_log_venda).format("DD/MM/YYYY hh:mm:ss") 
                 let data_log_venda = moment(element.data_log_venda).format("DD/MM/YYYY") 
                 let hora_log_venda = moment(element.data_log_venda).format("hh:mm:ss")
