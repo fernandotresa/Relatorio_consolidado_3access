@@ -262,7 +262,7 @@ function geraRelatorio(req, res){
             .then(() => {    
     
 
-                worksheet.getColumn(9).numFmt = '"£"#,##0.00;[Red]\-"£"#,##0.00';
+                worksheet.getColumn(9).numFmt = '"R$"#,##0.00;[Red]\-"£"#,##0.00';
                 
                 salvaExcel(req, workbook)
                 .then((filename) => {
