@@ -175,7 +175,12 @@ function handleDisconnects() {
 
                     else {
                         log_("Database conectado: " + poolDatabaseNames[i])   
-                        poolConnections.push(con)                                             
+                        poolConnections.push(con)    
+                        
+                        setInterval(function () {
+                            con.query('SELECT 1');
+                        }, 5000);
+
                         resolve()
 
                     }                                        
