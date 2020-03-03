@@ -166,10 +166,10 @@ function handleDisconnects() {
 
                 con.connect(function(err) {
                     if(err){
-                        reject('Erro no banco de dados: ' + poolDatabases[i].database + ' - ' + err);
+                        console.error('Erro no banco de dados: ' + poolDatabases[i].database + ' - ' + err);
 
                         setTimeout(() => {
-                            handleDisconnects()
+                            resolve(handleDisconnects())
                         }, 3000)
                     }
 
