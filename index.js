@@ -427,7 +427,8 @@ async function popularExcel(result, worksheet){
                 let id_estoque_utilizavel = element.id_estoque_utilizavel                            
                 let nome_tipo_produto = element.nome_tipo_produto
                 let nome_subtipo_produto = element.nome_subtipo_produto
-                let valor_produto = element.valor_produto
+                //let valor_produto = element.valor_produto
+                let valor_produto = element.valor_log_venda
                 let tipoPagamento = element.nome_tipo_pagamento
                 let centroCustoStr = element.centro_de_custo
                 let nomeParque = element.nome_do_parque
