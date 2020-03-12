@@ -80,6 +80,7 @@ function startExcel(){
             { header: 'Data da Venda', key: 'data_log_venda', width: 25 },
             { header: 'Hora da Venda', key: 'hora_log_venda', width: 25 },
             { header: 'Data do agendamento', key: 'data_utilizacao', width: 25 },
+            { header: 'Hora do agendamento', key: 'hora_utilizacao', width: 25 },
             { header: 'Número do Pedido', key: 'ip_maquina_venda', width: 25 },
             { header: 'Número de Ingresso', key: 'id_estoque_utilizavel', width: 25 },
             { header: 'Tipo de Ingresso / Hospedagem', key: 'tipoDeIngresso', width: 25 },
@@ -436,7 +437,8 @@ async function popularExcel(result, worksheet){
                 let tipoDeIngresso = nome_tipo_produto.includes("HOSPEDARIA") ? "Hospedaria" : "Ingressos"               
                 let serial_gtw = element.serial_gtw 
 
-                let data_utilizacao = moment(element.data_log_venda).format("DD/MM/YYYY hh:mm:ss") 
+                let data_utilizacao = moment(element.data_log_venda).format("DD/MM/YYYY") 
+                let hora_utilizacao = moment(element.data_log_venda).format("hh:mm:ss") 
                 let data_log_venda = moment(element.data_log_venda).format("DD/MM/YYYY") 
                 let hora_log_venda = moment(element.data_log_venda).format("hh:mm:ss")
                 let data_log_utilizacao = moment(element.data_log_utilizacao).format("DD/MM/YYYY")
@@ -457,6 +459,7 @@ async function popularExcel(result, worksheet){
                     data_log_venda: data_log_venda, 
                     hora_log_venda: hora_log_venda, 
                     data_utilizacao: data_utilizacao,
+                    hora_utilizacao: hora_utilizacao,
                     ip_maquina_venda: ip_maquina_venda, 
                     id_estoque_utilizavel: id_estoque_utilizavel, 
                     tipoDeIngresso: tipoDeIngresso, 
